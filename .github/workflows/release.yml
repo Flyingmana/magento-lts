@@ -21,6 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Dump GitHub context (Tag Name)
+      env:
+        GITHUB_CONTEXT_TAG_NAME: ${{ toJson(github.event.release.tag_name) }}
+      run: echo "$GITHUB_CONTEXT_TAG_NAME"
     - name: Dump GitHub context
       env:
         GITHUB_CONTEXT: ${{ toJson(github) }}
@@ -54,6 +58,7 @@ jobs:
       uses: elgohr/Github-Hub-Action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ toJson(github.event.release.tag_name) }}
       with:
-        args: release edit $({ github.ref }) --attach composer.json
+        args: release edit $({ github.event.release.tag_name }) --attach composer.json
     
