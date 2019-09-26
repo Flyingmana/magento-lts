@@ -1,7 +1,7 @@
 name: Release Building
 
 on:
-  project_column:
+  release:
     types: [created]
 
 jobs:
