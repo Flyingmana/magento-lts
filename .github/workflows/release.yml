@@ -17,6 +17,15 @@ jobs:
       run: |
         echo Add other actions to build,
         echo test, and deploy your project.
+  debug:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Run a one-line script
+      run: echo $({ github.ref })
+    - name: Run a multi-line script
+      run: echo $({ github.head_ref })
+  
   distrubutable_composer_json:
     needs: [build]
     runs-on: ubuntu-latest
