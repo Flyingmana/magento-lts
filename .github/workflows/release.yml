@@ -51,11 +51,19 @@ jobs:
       run: echo "$MATRIX_CONTEXT"
   
   distrubutable_composer_json:
-    needs: [build]
+#    needs: [build]
     runs-on: ubuntu-latest
     steps:
     - name: "checkout repository"
       uses: actions/checkout@master
+    - name: hub version
+      uses: elgohr/Github-Hub-Action@master
+      with:
+        args: version
+    - name: hub help
+      uses: elgohr/Github-Hub-Action@master
+      with:
+        args: help
     - name: attache Build to Release
       uses: elgohr/Github-Hub-Action@master
       env:
