@@ -55,13 +55,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: attache Build to Release
-      uses: elgohr/Github-Hub-Action@master
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAG: ${{ toJson(github.event.release.tag_name) }}
-      with:
-        args: release
-    - name: attache Build to Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ toJson(github.event.release.tag_name) }}
