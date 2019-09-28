@@ -57,7 +57,7 @@ jobs:
     - name: "checkout repository"
       uses: actions/checkout@master
     - name: "install hub"
-      run: "apt install hub"
+      run: "sudo apt install hub"
     - name: hub version
       run: hub version
     - name: hub help
