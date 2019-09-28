@@ -56,20 +56,15 @@ jobs:
     steps:
     - name: "checkout repository"
       uses: actions/checkout@master
+    - name: "install hub"
+      run: "apt install hub"
     - name: hub version
-      uses: elgohr/Github-Hub-Action@master
-      with:
-        args: version
+      run: hub version
     - name: hub help
-      uses: elgohr/Github-Hub-Action@master
-      with:
-        args: help
+      run: hub help
     - name: attache Build to Release
-      uses: elgohr/Github-Hub-Action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ toJson(github.event.release.tag_name) }}
-      with:
-        args: release edit $TAG --attach composer.json
-        # hub release edit $TAG --attach composer.json
+      run: hub release edit $TAG --attach composer.json
     
