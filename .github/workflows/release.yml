@@ -61,6 +61,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ toJson(github.event.release.tag_name) }}
-      run:
-        hub release edit $TAG --attach composer.json
+      with:
+        args: release edit $TAG --attach composer.json
+        # hub release edit $TAG --attach composer.json
     
