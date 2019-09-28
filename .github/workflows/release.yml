@@ -62,10 +62,9 @@ jobs:
       with:
         args: release
     - name: attache Build to Release
-      uses: elgohr/Github-Hub-Action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ toJson(github.event.release.tag_name) }}
-      with:
-        args: release edit $({ github.event.release.tag_name }) --attach composer.json
+      run:
+        hub release edit $({ github.event.release.tag_name }) --attach composer.json
     
