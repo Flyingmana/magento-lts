@@ -54,7 +54,10 @@ jobs:
     needs: [build]
     runs-on: ubuntu-latest
     steps:
+    - name: "checkout repository"
+      uses: actions/checkout@master
     - name: attache Build to Release
+      uses: elgohr/Github-Hub-Action@master
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ toJson(github.event.release.tag_name) }}
