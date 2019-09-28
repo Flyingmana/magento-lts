@@ -57,7 +57,7 @@ jobs:
     - name: "checkout repository"
       uses: actions/checkout@master
     - name: "install hub"
-      run: "sudo apt install hub"
+      run: "snap install hub --classic"
     - name: hub version
       run: hub version
     - name: hub help
