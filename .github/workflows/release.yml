@@ -31,6 +31,10 @@ jobs:
         TAG: ${{ (github.event.release.tag_name) }}
 #        TAG: "a8"
       run: hub release edit $TAG --attach composer.json --message="$TAG"
+    - name: Composer install Action
+      uses: MilesChou/composer-action@v0.0.1
+      with:
+        args: install
     - name: attache composer.lock to Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
