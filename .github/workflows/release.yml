@@ -40,6 +40,13 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TAG: ${{ (github.event.release.tag_name) }}
       run: hub release edit $TAG --attach composer.lock --message="$TAG"
+    - name: create zip file
+      run: zip -r $HOME/base_release.zip ./ -x "*.git*"
+    - name: attache composer.lock to Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ (github.event.release.tag_name) }}
+      run: hub release edit $TAG --attach $HOME/base_release.zip --message="$TAG"
     
   build:
 
