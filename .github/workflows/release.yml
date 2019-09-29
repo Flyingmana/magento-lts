@@ -20,6 +20,8 @@ jobs:
       run: hub version
     - name: hub help
       run: hub help
+    - name: hub release
+      run: hub release
     - name: attache composer.json to Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
