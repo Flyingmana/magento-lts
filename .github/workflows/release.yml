@@ -1,10 +1,31 @@
 name: Release Building
 
 on:
-  release:
-    types: [created]
+#  release:
+#    types: [created]
+  push
 
 jobs:
+  distrubutable_composer_json:
+#    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: "checkout repository"
+      uses: actions/checkout@master
+    - name: "install hub"
+      run: "sudo snap install hub --classic"
+    - name: chown 
+      run: sudo chown root:root /
+    - name: hub version
+      run: hub version
+    - name: hub help
+      run: hub help
+    - name: attache Build to Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ toJson(github.event.release.tag_name) }}
+      run: hub release edit $TAG --attach composer.json
+    
   build:
 
     runs-on: ubuntu-latest
@@ -50,21 +71,3 @@ jobs:
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
       run: echo "$MATRIX_CONTEXT"
   
-  distrubutable_composer_json:
-#    needs: [build]
-    runs-on: ubuntu-latest
-    steps:
-    - name: "checkout repository"
-      uses: actions/checkout@master
-    - name: "install hub"
-      run: "sudo snap install hub --classic"
-    - name: hub version
-      run: hub version
-    - name: hub help
-      run: hub help
-    - name: attache Build to Release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAG: ${{ toJson(github.event.release.tag_name) }}
-      run: hub release edit $TAG --attach composer.json
-    
