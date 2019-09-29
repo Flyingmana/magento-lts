@@ -17,3 +17,4 @@ jobs:
         echo test, and deploy your project.
     - name: create zip file
       run: zip -r $HOME/base_release.zip ./ -x "*.git*"
+    . run: ls -l
