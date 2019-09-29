@@ -34,7 +34,7 @@ jobs:
     - name: attache composer.lock to Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TAG: ${{ toJson(github.event.release.tag_name) }}
+        TAG: ${{ (github.event.release.tag_name) }}
       run: hub release edit $TAG --attach composer.lock --message="$TAG"
     
   build:
