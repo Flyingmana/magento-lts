@@ -1,9 +1,9 @@
 name: Release Building
 
 on:
-#  release:
-#    types: [created]
-  push
+  release:
+    types: [created]
+#  push
 
 jobs:
   distrubutable_composer_json:
@@ -20,12 +20,33 @@ jobs:
       run: hub version
     - name: hub help
       run: hub help
-    - name: attache Build to Release
+    - name: hub release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        TAG: ${{ toJson(github.event.release.tag_name) }}
-        TAG: "a8"
-      run: hub release edit $TAG --attach composer.json
+        TAG: ${{ toJson(github.event.release.tag_name) }}
+      run: hub release
+    - name: attache composer.json to Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ (github.event.release.tag_name) }}
+#        TAG: "a8"
+      run: hub release edit $TAG --attach composer.json --message="$TAG"
+    - name: Composer install Action
+      uses: MilesChou/composer-action@v0.0.1
+      with:
+        args: install
+    - name: attache composer.lock to Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ (github.event.release.tag_name) }}
+      run: hub release edit $TAG --attach composer.lock --message="$TAG"
+    - name: create zip file
+      run: zip -r $HOME/base_release.zip ./ -x "*.git*"
+    - name: attache base_release.zip to Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        TAG: ${{ (github.event.release.tag_name) }}
+      run: hub release edit $TAG --attach $HOME/base_release.zip --message="$TAG"
     
   build:
 
