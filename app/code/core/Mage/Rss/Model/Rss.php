@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Rss
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,7 @@ class Mage_Rss_Model_Rss
     {
         try {
             $rssFeedFromArray = Zend_Feed::importArray($this->getFeedArray(), 'rss');
-            return $rssFeedFromArray->saveXML();
+            return $rssFeedFromArray->saveXml();
         } catch (Exception $e) {
             return Mage::helper('rss')->__('Error in processing xml. %s',$e->getMessage());
         }

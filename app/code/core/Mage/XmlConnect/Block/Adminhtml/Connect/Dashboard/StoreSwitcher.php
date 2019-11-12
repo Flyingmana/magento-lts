@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_XmlConnect
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
      *
      * @param array $websites
      * @param Mage_XmlConnect_Model_Simplexml_Element $storeSwitcherXmlObj
-     * @return Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher
+     * @return $this
      */
     protected function _createStoreItemList($websites, Mage_XmlConnect_Model_Simplexml_Element $storeSwitcherXmlObj)
     {
@@ -74,7 +74,7 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
 
         if ($this->hasDefaultOption()) {
             $this->_addSwitcherItem($switcherItemsXmlObj, Mage_XmlConnect_Helper_AdminApplication::ALL_STORE_VIEWS,
-                array('label' => $this->getDefaultStoreName(), 'level' => 1));
+                array('label' => $this->escapeHtml($this->getDefaultStoreName()), 'level' => 1));
         }
 
         foreach ($websites as $website) {
@@ -92,7 +92,7 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
      * @param Mage_XmlConnect_Model_Simplexml_Element $switcherItemsXmlObj
      * @param array $website
      * @param array $group
-     * @return Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher
+     * @return $this
      */
     protected function _setStoreItemsByNestingLevel($storeSwitcherXmlObj, $switcherItemsXmlObj, $website, $group)
     {
@@ -101,14 +101,14 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
             if ($showWebsite == false) {
                 $showWebsite = true;
                 $this->_addSwitcherItem($switcherItemsXmlObj, null, array(
-                    'label' => $website->getName(), 'level' => 1
+                    'label' => $this->escapeHtml($website->getName()), 'level' => 1
                 ), true);
             }
 
             if ($showGroup == false) {
                 $showGroup = true;
                 $this->_addSwitcherItem($switcherItemsXmlObj, null, array(
-                    'label' => $group->getName(), 'level' => 2
+                    'label' => $this->escapeHtml($group->getName()), 'level' => 2
                 ), true);
             }
 
@@ -117,7 +117,7 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
             }
 
             $this->_addSwitcherItem($switcherItemsXmlObj, $store->getId(), array(
-                'label' => $store->getName(), 'level' => 3
+                'label' => $this->escapeHtml($store->getName()), 'level' => 3
             ));
         }
         return $this;
@@ -130,7 +130,7 @@ class Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher extends Ma
      * @param string $value
      * @param array $config
      * @param bool $isDisabled
-     * @return Mage_XmlConnect_Block_Adminhtml_Connect_Dashboard_StoreSwitcher
+     * @return $this
      */
     protected function _addSwitcherItem($xmlObj, $value, $config, $isDisabled = false)
     {

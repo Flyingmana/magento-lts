@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -218,7 +218,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Quote Item Before Save prepare data process
      *
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     protected function _beforeSave()
     {
@@ -280,7 +280,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Adding quantity to quote item
      *
      * @param float $qty
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function addQty($qty)
     {
@@ -302,7 +302,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Declare quote item quantity
      *
      * @param float $qty
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function setQty($qty)
     {
@@ -363,7 +363,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Set option product with Qty
      *
      * @param  $qtyOptions
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function setQtyOptions($qtyOptions)
     {
@@ -485,7 +485,9 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             return false;
         }
         foreach ($this->getOptions() as $option) {
-            if (in_array($option->getCode(), $this->_notRepresentOptions)) {
+            if (in_array($option->getCode(), $this->_notRepresentOptions)
+                && !$item->getProduct()->hasCustomOptions()
+            ) {
                 continue;
             }
             if ($itemOption = $item->getOptionByCode($option->getCode())) {
@@ -494,14 +496,25 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
 
                 // dispose of some options params, that can cramp comparing of arrays
                 if (is_string($itemOptionValue) && is_string($optionValue)) {
-                    $_itemOptionValue = @unserialize($itemOptionValue);
-                    $_optionValue = @unserialize($optionValue);
-                    if (is_array($_itemOptionValue) && is_array($_optionValue)) {
-                        $itemOptionValue = $_itemOptionValue;
-                        $optionValue = $_optionValue;
-                        // looks like it does not break bundle selection qty
-                        unset($itemOptionValue['qty'], $itemOptionValue['uenc']);
-                        unset($optionValue['qty'], $optionValue['uenc']);
+                    try {
+                        /** @var Unserialize_Parser $parser */
+                        $parser = Mage::helper('core/unserializeArray');
+
+                        $_itemOptionValue =
+                            is_numeric($itemOptionValue) ? $itemOptionValue : $parser->unserialize($itemOptionValue);
+                        $_optionValue = is_numeric($optionValue) ? $optionValue : $parser->unserialize($optionValue);
+
+                        if (is_array($_itemOptionValue) && is_array($_optionValue)) {
+                            $itemOptionValue = $_itemOptionValue;
+                            $optionValue = $_optionValue;
+                            // looks like it does not break bundle selection qty
+                            foreach (array('qty', 'uenc', 'form_key', 'item', 'original_qty') as $key) {
+                                unset($itemOptionValue[$key], $optionValue[$key]);
+                            }
+                        }
+
+                    } catch (Exception $e) {
+                        Mage::logException($e);
                     }
                 }
 
@@ -628,7 +641,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *
      * @param Varien_Object $option
      * @param int|float|null $value
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function updateQtyOption(Varien_Object $option, $value)
     {
@@ -649,7 +662,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *Remove option from item options
      *
      * @param string $code
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function removeOption($code)
     {
@@ -708,7 +721,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Save item options
      *
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     protected function _saveItemOptions()
     {
@@ -746,7 +759,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Save item options after item saved
      *
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     protected function _afterSave()
     {
@@ -757,7 +770,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Clone quote item
      *
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function __clone()
     {
@@ -794,7 +807,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Sets flag, whether this quote item has some error associated with it.
      *
      * @param bool $flag
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     protected function _setHasError($flag)
     {
@@ -808,7 +821,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * It's recommended to use addErrorInfo() instead - to be able to remove error statuses later.
      *
      * @param bool $flag
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      * @see addErrorInfo()
      */
     public function setHasError($flag)
@@ -825,7 +838,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Clears list of errors, associated with this quote item.
      * Also automatically removes error-flag from oneself.
      *
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     protected function _clearErrorInfo()
     {
@@ -842,7 +855,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * @param int|null $code Error code, unique for origin, that sets it
      * @param string|null $message Error message
      * @param Varien_Object|null $additionalData Any additional data, that caller would like to store
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function addErrorInfo($origin = null, $code = null, $message = null, $additionalData = null)
     {
@@ -871,7 +884,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      *   'origin', 'code', 'message'
      *
      * @param array $params
-     * @return Mage_Sales_Model_Quote_Item
+     * @return $this
      */
     public function removeErrorInfosByParams($params)
     {

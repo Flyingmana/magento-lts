@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,7 +58,7 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
      * Setter
      *
      * @param integer $storeId
-     * @return Mage_Core_Model_Variable
+     * @return $this
      */
     public function setStoreId($storeId)
     {
@@ -80,7 +80,7 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
      * Load variable by code
      *
      * @param string $code
-     * @return Mage_Core_Model_Variable
+     * @return $this
      */
     public function loadByCode($code)
     {
@@ -141,7 +141,10 @@ class Mage_Core_Model_Variable extends Mage_Core_Model_Abstract
         foreach ($collection->toOptionArray() as $variable) {
             $variables[] = array(
                 'value' => '{{customVar code=' . $variable['value'] . '}}',
-                'label' => Mage::helper('core')->__('%s', $variable['label'])
+                'label' => Mage::helper('core')->__(
+                    '%s',
+                    Mage::helper('core')->escapeHtml($variable['label']
+                    ))
             );
         }
         if ($withGroup && $variables) {

@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Newsletter
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,24 +80,25 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
         parent::_construct();
         $this->_init('newsletter/subscriber');
         $this->_queueLinkTable = $this->getTable('newsletter/queue_link');
-        $this->_storeTable = $this->getTable('core/store');
+        $this->_storeTable     = $this->getTable('core/store');
 
 
         // defining mapping for fields represented in several tables
-        $this->_map['fields']['customer_lastname'] = 'customer_lastname_table.value';
-        $this->_map['fields']['customer_firstname'] = 'customer_firstname_table.value';
-        $this->_map['fields']['type'] = $this->getResource()->getReadConnection()
+        $this->_map['fields']['customer_lastname']   = 'customer_lastname_table.value';
+        $this->_map['fields']['customer_middlename'] = 'customer_middlename_table.value';
+        $this->_map['fields']['customer_firstname']  = 'customer_firstname_table.value';
+        $this->_map['fields']['type']                = $this->getResource()->getReadConnection()
             ->getCheckSql('main_table.customer_id = 0', 1, 2);
-        $this->_map['fields']['website_id'] = 'store.website_id';
-        $this->_map['fields']['group_id'] = 'store.group_id';
-        $this->_map['fields']['store_id'] = 'main_table.store_id';
+        $this->_map['fields']['website_id']          = 'store.website_id';
+        $this->_map['fields']['group_id']            = 'store.group_id';
+        $this->_map['fields']['store_id']            = 'main_table.store_id';
     }
 
     /**
      * Set loading mode subscribers by queue
      *
      * @param Mage_Newsletter_Model_Queue $queue
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function useQueue(Mage_Newsletter_Model_Queue $queue)
     {
@@ -111,7 +112,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Set using of links to only unsendet letter subscribers.
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function useOnlyUnsent()
     {
@@ -125,26 +126,36 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Adds customer info to select
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function showCustomerInfo()
     {
-        $adapter = $this->getConnection();
-        $customer = Mage::getModel('customer/customer');
+        $adapter    = $this->getConnection();
+        $customer   = Mage::getModel('customer/customer');
         $firstname  = $customer->getAttribute('firstname');
         $lastname   = $customer->getAttribute('lastname');
+        $middlename = $customer->getAttribute('middlename');
 
         $this->getSelect()
             ->joinLeft(
-                array('customer_lastname_table'=>$lastname->getBackend()->getTable()),
+                array('customer_lastname_table' => $lastname->getBackend()->getTable()),
                 $adapter->quoteInto('customer_lastname_table.entity_id=main_table.customer_id
-                 AND customer_lastname_table.attribute_id = ?', (int)$lastname->getAttributeId()),
+                    AND customer_lastname_table.attribute_id = ?', (int) $lastname->getAttributeId()
+                ),
                 array('customer_lastname'=>'value')
             )
             ->joinLeft(
-                array('customer_firstname_table'=>$firstname->getBackend()->getTable()),
+                array('customer_middlename_table' => $middlename->getBackend()->getTable()),
+                $adapter->quoteInto('customer_middlename_table.entity_id=main_table.customer_id
+                    AND customer_middlename_table.attribute_id = ?', (int) $middlename->getAttributeId()
+                ),
+                array('customer_middlename'=>'value')
+            )
+            ->joinLeft(
+                array('customer_firstname_table' => $firstname->getBackend()->getTable()),
                 $adapter->quoteInto('customer_firstname_table.entity_id=main_table.customer_id
-                 AND customer_firstname_table.attribute_id = ?', (int)$firstname->getAttributeId()),
+                    AND customer_firstname_table.attribute_id = ?', (int) $firstname->getAttributeId()
+                ),
                 array('customer_firstname'=>'value')
             );
 
@@ -154,7 +165,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Add type field expression to select
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function addSubscriberTypeField()
     {
@@ -166,7 +177,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Sets flag for customer info loading on load
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function showStoreInfo()
     {
@@ -223,7 +234,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Load only subscribed customers
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function useOnlyCustomers()
     {
@@ -235,7 +246,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
     /**
      * Show only with subscribed status
      *
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function useOnlySubscribed()
     {
@@ -248,7 +259,7 @@ class Mage_Newsletter_Model_Resource_Subscriber_Collection extends Mage_Core_Mod
      * Filter collection by specified store ids
      *
      * @param array|int $storeIds
-     * @return Mage_Newsletter_Model_Resource_Subscriber_Collection
+     * @return $this
      */
     public function addStoreFilter($storeIds)
     {

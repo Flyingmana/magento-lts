@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 if (version_compare(phpversion(), '5.2.0', '<')===true) {
@@ -35,12 +35,13 @@ $start = microtime(true);
 /**
  * Error reporting
  */
-error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', 0);
 
 $ds = DIRECTORY_SEPARATOR;
 $ps = PATH_SEPARATOR;
 $bp = dirname(__FILE__);
+
+require $bp . '/app/bootstrap.php';
 
 /**
  * Set include path
@@ -115,7 +116,7 @@ if (empty($mediaDirectory)) {
         $mageRunCode,
         $mageRunType,
         array('cache' => array('disallow_save' => true)),
-        array('Mage_Core')
+        isset($config['loaded_modules']) ? $config['loaded_modules'] : ['Mage_Core']
     );
 }
 
@@ -141,27 +142,26 @@ if (0 !== stripos($pathInfo, $mediaDirectory . '/')) {
     sendNotFoundPage();
 }
 
+$databaseFileStorage = Mage::getModel('core/file_storage_database');
 try {
-    $databaseFileSotrage = Mage::getModel('core/file_storage_database');
-    $databaseFileSotrage->loadByFilename($relativeFilename);
+    $databaseFileStorage->loadByFilename($relativeFilename);
 } catch (Exception $e) {
 }
-if ($databaseFileSotrage->getId()) {
-    $directory = dirname($filePath);
-    if (!is_dir($directory)) {
-        mkdir($directory, 0777, true);
+if ($databaseFileStorage->getId()) {
+    try {
+        if (Mage::getModel('core/file_storage_file')->saveFile($databaseFileStorage, false) === false) {
+            // False return value means file was not overwritten. However, it may not be ready
+            // to be read yet so wait for shared lock to ensure file is not partially read.
+            if ($fp = fopen($filePath, 'r')) {
+                flock($fp, LOCK_SH) && flock($fp, LOCK_UN) && fclose($fp);
+            }
+        }
+        sendFile($filePath);
+    } catch (Exception $e) {
+        Mage::logException($e);
     }
-
-    $fp = fopen($filePath, 'w');
-    if (flock($fp, LOCK_EX | LOCK_NB)) {
-        ftruncate($fp, 0);
-        fwrite($fp, $databaseFileSotrage->getContent());
-    }
-    flock($fp, LOCK_UN);
-    fclose($fp);
 }
 
-sendFile($filePath);
 sendNotFoundPage();
 
 /**
@@ -192,6 +192,7 @@ function checkResource($resource, array $allowedResources)
         sendNotFoundPage();
     }
 }
+
 /**
  * Send file to browser
  *

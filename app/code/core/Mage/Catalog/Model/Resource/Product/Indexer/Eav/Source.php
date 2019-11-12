@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Catalog
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -61,7 +61,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
             ->where($this->_getIndexableAttributesCondition());
 
         if ($multiSelect == true) {
-            $select->where('ea.backend_type = ?', 'varchar')
+            $select->where('ea.backend_type = ?', 'text')
                 ->where('ea.frontend_input = ?', 'multiselect');
         } else {
             $select->where('ea.backend_type = ?', 'int')
@@ -76,7 +76,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
      *
      * @param array $entityIds      the entity ids limitation
      * @param int $attributeId      the attribute id limitation
-     * @return Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
+     * @return $this
      */
     protected function _prepareIndex($entityIds = null, $attributeId = null)
     {
@@ -91,7 +91,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
      *
      * @param array $entityIds      the entity ids limitation
      * @param int $attributeId      the attribute id limitation
-     * @return Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
+     * @return $this
      */
     protected function _prepareSelectIndex($entityIds = null, $attributeId = null)
     {
@@ -172,7 +172,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
      *
      * @param array $entityIds      the entity ids limitation
      * @param int $attributeId      the attribute id limitation
-     * @return Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
+     * @return $this
      */
     protected function _prepareMultiselectIndex($entityIds = null, $attributeId = null)
     {
@@ -203,14 +203,14 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
         $productValueExpression = $adapter->getCheckSql('pvs.value_id > 0', 'pvs.value', 'pvd.value');
         $select = $adapter->select()
             ->from(
-                array('pvd' => $this->getValueTable('catalog/product', 'varchar')),
+                array('pvd' => $this->getValueTable('catalog/product', 'text')),
                 array('entity_id', 'attribute_id'))
             ->join(
                 array('cs' => $this->getTable('core/store')),
                 '',
                 array('store_id'))
             ->joinLeft(
-                array('pvs' => $this->getValueTable('catalog/product', 'varchar')),
+                array('pvs' => $this->getValueTable('catalog/product', 'text')),
                 'pvs.entity_id = pvd.entity_id AND pvs.attribute_id = pvd.attribute_id'
                     . ' AND pvs.store_id=cs.store_id',
                 array('value' => $productValueExpression))
@@ -240,7 +240,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
         $data  = array();
         $query = $select->query();
         while ($row = $query->fetch()) {
-            $values = explode(',', $row['value']);
+            $values = array_unique(explode(',', $row['value']));
             foreach ($values as $valueId) {
                 if (isset($options[$row['attribute_id']][$valueId])) {
                     $data[] = array(
@@ -269,7 +269,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
      * Save a data to temporary source index table
      *
      * @param array $data
-     * @return Mage_Catalog_Model_Resource_Product_Indexer_Eav_Source
+     * @return $this
      */
     protected function _saveIndexData(array $data)
     {

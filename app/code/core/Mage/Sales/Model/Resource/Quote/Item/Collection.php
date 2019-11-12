@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,7 +71,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
      * Set Quote object to Collection
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Sales_Model_Resource_Quote_Item_Collection
+     * @return $this
      */
     public function setQuote($quote)
     {
@@ -92,7 +92,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
      *
      * @param string $quotesTableName
      * @param int $productId
-     * @return Mage_Sales_Model_Resource_Quote_Item_Collection
+     * @return $this
      */
     public function resetJoinQuotes($quotesTableName, $productId = null)
     {
@@ -114,7 +114,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
     /**
      * After load processing
      *
-     * @return Mage_Sales_Model_Resource_Quote_Item_Collection
+     * @return $this
      */
     protected function _afterLoad()
     {
@@ -145,7 +145,7 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
     /**
      * Add options to items
      *
-     * @return Mage_Sales_Model_Resource_Quote_Item_Collection
+     * @return $this
      */
     protected function _assignOptions()
     {
@@ -164,11 +164,14 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
     /**
      * Add products to items and item options
      *
-     * @return Mage_Sales_Model_Resource_Quote_Item_Collection
+     * @return $this
      */
     protected function _assignProducts()
     {
         Varien_Profiler::start('QUOTE:'.__METHOD__);
+        $productFlatHelper = Mage::helper('catalog/product_flat');
+        $productFlatHelper->disableFlatCollection();
+
         $productIds = array();
         foreach ($this as $item) {
             $productIds[] = (int)$item->getProductId();
@@ -234,8 +237,9 @@ class Mage_Sales_Model_Resource_Quote_Item_Collection extends Mage_Core_Model_Re
         if ($recollectQuote && $this->_quote) {
             $this->_quote->collectTotals();
         }
-        Varien_Profiler::stop('QUOTE:'.__METHOD__);
 
+        $productFlatHelper->resetFlatCollection();
+        Varien_Profiler::stop('QUOTE:'.__METHOD__);
         return $this;
     }
 }

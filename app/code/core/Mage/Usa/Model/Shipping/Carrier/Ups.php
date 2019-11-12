@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Usa
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -145,7 +145,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups
      * Prepare and set request to this instance
      *
      * @param Mage_Shipping_Model_Rate_Request $request
-     * @return Mage_Usa_Model_Shipping_Carrier_Ups
+     * @return $this
      */
     public function setRequest(Mage_Shipping_Model_Rate_Request $request)
     {
@@ -937,7 +937,7 @@ XMLRequest;
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlRequest);
                 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, (boolean)$this->getConfigFlag('mode_xml'));
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->getConfigFlag('verify_peer'));
                 $xmlResponse = curl_exec ($ch);
 
                 $debugData['result'] = $xmlResponse;
@@ -1548,7 +1548,7 @@ XMLAuth;
                 ->addChild('Code', 'GIF');
 
         $this->setXMLAccessRequest();
-        $xmlRequest = $this->_xmlAccessRequest . $xmlRequest->asXml();
+        $xmlRequest = $this->_xmlAccessRequest . $xmlRequest->asXML();
         return $xmlRequest;
     }
 
@@ -1578,7 +1578,7 @@ XMLAuth;
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $this->_xmlAccessRequest . $xmlRequest->asXML());
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, (boolean)$this->getConfigFlag('mode_xml'));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->getConfigFlag('verify_peer'));
             $xmlResponse = curl_exec ($ch);
 
             $debugData['result'] = $xmlResponse;
@@ -1636,7 +1636,7 @@ XMLAuth;
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $xmlRequest);
             curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, (boolean)$this->getConfigFlag('mode_xml'));
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->getConfigFlag('verify_peer'));
             $xmlResponse = curl_exec($ch);
             if ($xmlResponse === false) {
                 throw new Exception(curl_error($ch));

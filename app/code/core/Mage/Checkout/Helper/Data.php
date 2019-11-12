@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Checkout
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,7 +122,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
         }
         //Since tax amount contains weee tax
         $tax = $item->getTaxAmount() + $item->getDiscountTaxCompensation()
-            - $this->_getWeeeHelper()->getTotalRowTaxAppliedForWeeeTax($item);;
+            - $this->_getWeeeHelper()->getTotalRowTaxAppliedForWeeeTax($item);
 
         return $item->getRowTotal() + $tax;
     }
@@ -169,7 +169,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Sales_Model_Quote $checkout
      * @param string $message
      * @param string $checkoutType
-     * @return Mage_Checkout_Helper_Data
+     * @return $this
      */
     public function sendPaymentFailedEmail($checkout, $message, $checkoutType = 'onepage')
     {
@@ -231,19 +231,19 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
                 Mage::getStoreConfig('checkout/payment_failed/identity', $checkout->getStoreId()),
                 $recipient['email'],
                 $recipient['name'],
-                array(
-                    'reason' => $message,
-                    'checkoutType' => $checkoutType,
-                    'dateAndTime' => Mage::app()->getLocale()->date(),
-                    'customer' => $checkout->getCustomerFirstname() . ' ' . $checkout->getCustomerLastname(),
-                    'customerEmail' => $checkout->getCustomerEmail(),
-                    'billingAddress' => $checkout->getBillingAddress(),
-                    'shippingAddress' => $checkout->getShippingAddress(),
-                    'shippingMethod' => Mage::getStoreConfig('carriers/'.$shippingMethod.'/title'),
-                    'paymentMethod' => Mage::getStoreConfig('payment/'.$paymentMethod.'/title'),
-                    'items' => nl2br($items),
-                    'total' => $total
-                )
+                    array(
+                        'reason'          => $message,
+                        'checkoutType'    => $checkoutType,
+                        'dateAndTime'     => Mage::app()->getLocale()->date(),
+                        'customer'        => Mage::helper('customer')->getFullCustomerName($checkout),
+                        'customerEmail'   => $checkout->getCustomerEmail(),
+                        'billingAddress'  => $checkout->getBillingAddress(),
+                        'shippingAddress' => $checkout->getShippingAddress(),
+                        'shippingMethod'  => Mage::getStoreConfig('carriers/' . $shippingMethod . '/title'),
+                        'paymentMethod'   => Mage::getStoreConfig('payment/' . $paymentMethod . '/title'),
+                        'items'           => nl2br($items),
+                        'total'           => $total,
+                    )
             );
         }
 

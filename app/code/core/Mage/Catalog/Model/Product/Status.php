@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Catalog
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,6 @@
 /**
  * Product status functionality model
  *
- * @method Mage_Catalog_Model_Resource_Product_Status _getResource()
  * @method Mage_Catalog_Model_Resource_Product_Status getResource()
  * @method int getProductId()
  * @method Mage_Catalog_Model_Product_Status setProductId(int $value)
@@ -88,7 +87,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      *
      * @deprecated remove on new builds
      * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
-     * @return Mage_Catalog_Model_Product_Status
+     * @return $this
      */
     public function addVisibleFilterToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection)
     {
@@ -101,7 +100,7 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      *
      * @deprecated remove on new builds
      * @param Mage_Eav_Model_Entity_Collection_Abstract $collection
-     * @return Mage_Catalog_Model_Product_Status
+     * @return $this
      */
     public function addSaleableFilterToCollection(Mage_Eav_Model_Entity_Collection_Abstract $collection)
     {
@@ -141,6 +140,16 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
             self::STATUS_ENABLED    => Mage::helper('catalog')->__('Enabled'),
             self::STATUS_DISABLED   => Mage::helper('catalog')->__('Disabled')
         );
+    }
+
+    /**
+     * Retrieve option array
+     *
+     * @return array
+     */
+    static public function toOptionArray()
+    {
+        return self::getOptionArray();
     }
 
     /**
@@ -248,7 +257,23 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      */
     public function getFlatColums()
     {
-        return array();
+        $attributeCode = $this->getAttribute()->getAttributeCode();
+        $column = array(
+            'unsigned'  => true,
+            'default'   => null,
+            'extra'     => null
+        );
+
+        if (Mage::helper('core')->useDbCompatibleMode()) {
+            $column['type']     = 'tinyint';
+            $column['is_null']  = true;
+        } else {
+            $column['type']     = Varien_Db_Ddl_Table::TYPE_SMALLINT;
+            $column['nullable'] = true;
+            $column['comment']  = 'Catalog Product Status ' . $attributeCode . ' column';
+        }
+
+        return array($attributeCode => $column);
     }
 
     /**
@@ -258,7 +283,15 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      */
     public function getFlatIndexes()
     {
-        return array();
+        $indexes = array();
+
+        $index = 'IDX_' . strtoupper($this->getAttribute()->getAttributeCode());
+        $indexes[$index] = array(
+            'type'      => 'index',
+            'fields'    => array($this->getAttribute()->getAttributeCode())
+        );
+
+        return $indexes;
     }
 
     /**
@@ -270,7 +303,8 @@ class Mage_Catalog_Model_Product_Status extends Mage_Core_Model_Abstract
      */
     public function getFlatUpdateSelect($store)
     {
-        return null;
+        return Mage::getResourceSingleton('eav/entity_attribute')
+            ->getFlatUpdateSelect($this->getAttribute(), $store);
     }
 
     /**

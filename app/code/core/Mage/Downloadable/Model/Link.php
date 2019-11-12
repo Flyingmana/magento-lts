@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Downloadable
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -88,7 +88,7 @@ class Mage_Downloadable_Model_Link extends Mage_Core_Model_Abstract
     /**
      * Enter description here...
      *
-     * @return Mage_Downloadable_Model_Link
+     * @return $this
      */
     protected function _afterSave()
     {

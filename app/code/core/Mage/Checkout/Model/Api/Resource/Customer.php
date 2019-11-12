@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Checkout
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -109,7 +109,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
      * Prepare quote for guest checkout order submit
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Checkout_Model_Api_Resource_Customer
+     * @return $this
      */
     protected function _prepareGuestQuote(Mage_Sales_Model_Quote $quote)
     {
@@ -124,7 +124,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
      * Prepare quote for customer registration and customer order submit
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Checkout_Model_Api_Resource_Customer
+     * @return $this
      */
     protected function _prepareNewCustomerQuote(Mage_Sales_Model_Quote $quote)
     {
@@ -149,9 +149,10 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
+        $customer->setPasswordCreatedAt(time());
         $quote->setCustomer($customer)
             ->setCustomerId(true);
-
+        $quote->setPasswordHash('');
         return $this;
     }
 
@@ -159,7 +160,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
      * Prepare quote for customer order submit
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Checkout_Model_Api_Resource_Customer
+     * @return $this
      */
     protected function _prepareCustomerQuote(Mage_Sales_Model_Quote $quote)
     {
@@ -196,7 +197,7 @@ class Mage_Checkout_Model_Api_Resource_Customer extends Mage_Checkout_Model_Api_
      * Involve new customer to system
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Checkout_Model_Api_Resource_Customer
+     * @return $this
      */
     public function involveNewCustomer(Mage_Sales_Model_Quote $quote)
     {

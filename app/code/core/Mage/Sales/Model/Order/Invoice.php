@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -178,7 +178,10 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      */
     protected $_wasPayCalled = false;
 
-    public function __destruct()
+    /**
+     * Uploader clean on shutdown
+     */
+    public function destruct()
     {
         if ($this->_saveBeforeDestruct) {
             $this->save();
@@ -193,10 +196,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
         $this->_init('sales/order_invoice');
     }
 
+
     /**
      * Init mapping array of short fields to its full names
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     protected function _initOldFieldsMap()
     {
@@ -208,7 +212,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      * Load invoice by increment id
      *
      * @param string $incrementId
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function loadByIncrementId($incrementId)
     {
@@ -340,6 +344,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
                 if ($canVoid === false) {
                     $this->setCanVoidFlag(false);
                     $this->_saveBeforeDestruct = true;
+                    register_shutdown_function(array($this, 'destruct'));
                 }
             }
             else {
@@ -378,7 +383,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Capture invoice
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function capture()
     {
@@ -392,7 +397,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Pay invoice
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function pay()
     {
@@ -431,7 +436,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Void invoice
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function void()
     {
@@ -443,7 +448,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Cancel invoice action
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function cancel()
     {
@@ -492,7 +497,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Invoice totals collecting
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function collectTotals()
     {
@@ -617,7 +622,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * Apply to order, order items etc.
      *
-     * @return unknown
+     * @return $this
      */
     public function register()
     {
@@ -704,10 +709,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      * Adds comment to invoice with additional possibility to send it to customer via email
      * and show it in customer account
      *
+     * @param Mage_Sales_Model_Order_Invoice_Comment|string $comment
      * @param bool $notify
      * @param bool $visibleOnFront
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function addComment($comment, $notify=false, $visibleOnFront=false)
     {
@@ -753,7 +759,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @param boolean $notifyCustomer
      * @param string $comment
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function sendEmail($notifyCustomer = true, $comment = '')
     {
@@ -834,8 +840,11 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
             )
         );
         $mailer->send();
-        $this->setEmailSent(true);
-        $this->_getResource()->saveAttribute($this, 'email_sent');
+
+        if ($notifyCustomer) {
+            $this->setEmailSent(true);
+            $this->_getResource()->saveAttribute($this, 'email_sent');
+        }
 
         return $this;
     }
@@ -845,7 +854,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
      *
      * @param boolean $notifyCustomer
      * @param string $comment
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function sendUpdateEmail($notifyCustomer = true, $comment = '')
     {
@@ -928,7 +937,7 @@ class Mage_Sales_Model_Order_Invoice extends Mage_Sales_Model_Abstract
     /**
      * Reset invoice object
      *
-     * @return Mage_Sales_Model_Order_Invoice
+     * @return $this
      */
     public function reset()
     {

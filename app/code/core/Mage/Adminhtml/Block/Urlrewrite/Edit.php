@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
      * Prepare page layout, basing on different registry and request variables
      *
      * Generates layout of: creation modes selector, products grid, categories tree, urlrewrite edit form
-     * @return Mage_Adminhtml_Block_Urlrewrite_Edit
+     * @return $this
      */
     protected function _prepareLayout()
     {
@@ -103,7 +103,9 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
             }
             // categories selector & skip categories button
             else {
-                $this->setChild('categories_tree', $this->getLayout()->createBlock('adminhtml/urlrewrite_category_tree'));
+                $this->setChild('categories_tree',
+                    $this->getLayout()->createBlock('adminhtml/urlrewrite_category_tree')
+                );
                 $this->setChild('skip_categories',
                     $this->getLayout()->createBlock('adminhtml/widget_button')->setData(array(
                         'label'   => Mage::helper('adminhtml')->__('Skip Category Selection'),
@@ -146,7 +148,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
     /**
      * Add edit form as child block and add appropriate buttons
      *
-     * @return Mage_Adminhtml_Block_Urlrewrite_Edit
+     * @return $this
      */
     protected function _setFormChild()
     {
@@ -160,8 +162,13 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
             ));
             $this->_addButton('delete', array(
                 'label'   => Mage::helper('adminhtml')->__('Delete'),
-                'onclick' => 'deleteConfirm(\'' . Mage::helper('adminhtml')->__('Are you sure you want to do this?')
-                    . '\', \'' . Mage::helper('adminhtml')->getUrl('*/*/delete', array('id' => $this->getUrlrewriteId())) . '\')',
+                'onclick' => 'deleteConfirm(\''
+                    . Mage::helper('core')->jsQuoteEscape(
+                        Mage::helper('adminhtml')->__('Are you sure you want to do this?')
+                    )
+                    . '\', \''
+                    . Mage::helper('adminhtml')->getUrl('*/*/delete', array('id' => $this->getUrlrewriteId()))
+                    . '\')',
                 'class'   => 'scalable delete',
                 'level'   => -1
             ));
@@ -258,7 +265,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit extends Mage_Adminhtml_Block_Widget_C
      * Update layout by specified mode code
      *
      * @param string $mode
-     * @return Mage_Adminhtml_Block_Urlrewrite_Edit
+     * @return $this
      * @see Mage_Adminhtml_Block_Urlrewrite_Selector
      */
     public function updateModeLayout($mode = null)

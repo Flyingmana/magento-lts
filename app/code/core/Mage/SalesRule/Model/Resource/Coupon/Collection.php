@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_SalesRule
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,7 +49,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Collection extends Mage_Core_Model_Re
      *
      * @param Mage_SalesRule_Model_Rule|int $rule
      *
-     * @return Mage_SalesRule_Model_Resource_Coupon_Collection
+     * @return $this
      */
     public function addRuleToFilter($rule)
     {
@@ -69,7 +69,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Collection extends Mage_Core_Model_Re
      *
      * @param array $ruleIds
      *
-     * @return Mage_SalesRule_Model_Resource_Coupon_Collection
+     * @return $this
      */
     public function addRuleIdsToFilter(array $ruleIds)
     {
@@ -80,7 +80,7 @@ class Mage_SalesRule_Model_Resource_Coupon_Collection extends Mage_Core_Model_Re
     /**
      * Filter collection to be filled with auto-generated coupons only
      *
-     * @return Mage_SalesRule_Model_Resource_Coupon_Collection
+     * @return $this
      */
     public function addGeneratedCouponsFilter()
     {
@@ -97,9 +97,9 @@ class Mage_SalesRule_Model_Resource_Coupon_Collection extends Mage_Core_Model_Re
     public function addIsUsedFilterCallback($collection, $column)
     {
         $filterValue = $column->getFilter()->getCondition();
-        $collection->addFieldToFilter(
-            $this->getConnection()->getCheckSql('main_table.times_used > 0', 1, 0),
-            array('eq' => $filterValue)
-        );
+
+        $fieldExpression = $this->getConnection()->getCheckSql('main_table.times_used > 0', 1, 0);
+        $resultCondition = $this->_getConditionSql($fieldExpression, array('eq' => $filterValue));
+        $collection->getSelect()->where($resultCondition);
     }
 }

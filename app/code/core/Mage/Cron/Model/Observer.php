@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Cron
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -103,6 +103,7 @@ class Mage_Cron_Model_Observer
         if (!$this->_pendingSchedules) {
             $this->_pendingSchedules = Mage::getModel('cron/schedule')->getCollection()
                 ->addFieldToFilter('status', Mage_Cron_Model_Schedule::STATUS_PENDING)
+                ->orderByScheduledAt()
                 ->load();
         }
         return $this->_pendingSchedules;
@@ -111,7 +112,7 @@ class Mage_Cron_Model_Observer
     /**
      * Generate cron schedule
      *
-     * @return Mage_Cron_Model_Observer
+     * @return $this
      */
     public function generate()
     {
@@ -202,7 +203,7 @@ class Mage_Cron_Model_Observer
     /**
      * Clean up the history of tasks
      *
-     * @return Mage_Cron_Model_Observer
+     * @return $this
      */
     public function cleanup()
     {
@@ -244,7 +245,7 @@ class Mage_Cron_Model_Observer
      *
      * @param $jobCode
      * @param $jobConfig
-     * @return Mage_Cron_Model_Observer
+     * @return $this
      */
     protected function _processAlwaysTask($jobCode, $jobConfig)
     {
@@ -271,7 +272,7 @@ class Mage_Cron_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @param $jobConfig
      * @param bool $isAlways
-     * @return Mage_Cron_Model_Observer
+     * @return $this
      */
     protected function _processJob($schedule, $jobConfig, $isAlways = false)
     {
@@ -316,6 +317,7 @@ class Mage_Cron_Model_Observer
                 though running status is set in tryLockJob we must set it here because the object
                 was loaded with a pending status and will set it back to pending if we don't set it here
                  */
+                 $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING);
             }
 
             $schedule

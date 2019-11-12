@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Admin
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,6 +31,11 @@
  * @category    Mage
  * @package     Mage_Admin
  * @author      Magento Core Team <core@magentocommerce.com>
+ *
+ * @method Mage_Admin_Model_User getUser()
+ * @method $this setUser(Mage_Admin_Model_User $user)
+ * @method Mage_Admin_Model_Acl getAcl()
+ * @method $this setAcl(Mage_Admin_Model_Acl $acl)
  */
 class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
 {
@@ -76,6 +81,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $parameters['factory'] : Mage::getModel('core/factory');
 
         $this->init('admin');
+        $this->logoutIndirect();
     }
 
     /**
@@ -88,7 +94,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      *
      * @param string $namespace
      * @param string $sessionName
-     * @return Mage_Admin_Model_Session
+     * @return $this
      * @see self::login()
      */
     public function init($namespace, $sessionName = null)
@@ -96,6 +102,21 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
         parent::init($namespace, $sessionName);
         $this->isFirstPageAfterLogin();
         return $this;
+    }
+
+    /**
+     * Logout user if was logged not from admin
+     */
+    protected function logoutIndirect()
+    {
+        $user = $this->getUser();
+        if ($user) {
+            $extraData = $user->getExtra();
+            if (isset($extraData['indirect_login']) && $this->getIndirectLogin()) {
+                $this->unsetData('user');
+                $this->setIndirectLogin(false);
+            }
+        }
     }
 
     /**
@@ -138,22 +159,23 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
                 Mage::throwException(Mage::helper('adminhtml')->__('Invalid User Name or Password.'));
             }
         } catch (Mage_Core_Exception $e) {
-            Mage::dispatchEvent('admin_session_user_login_failed',
-                array('user_name' => $username, 'exception' => $e));
-            if ($request && !$request->getParam('messageSent')) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                $request->setParam('messageSent', true);
-            }
+            $e->setMessage(
+                Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.')
+            );
+            $this->_loginFailed($e, $request, $username, $e->getMessage());
+        } catch (Exception $e) {
+            $message = Mage::helper('adminhtml')->__('An error occurred while logging in.');
+            $this->_loginFailed($e, $request, $username, $message);
         }
 
-        return $user;
+        return isset($user) ? $user : null;
     }
 
     /**
      * Refresh ACL resources stored in session
      *
      * @param  Mage_Admin_Model_User $user
-     * @return Mage_Admin_Model_Session
+     * @return $this
      */
     public function refreshAcl($user = null)
     {
@@ -167,8 +189,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $this->setAcl(Mage::getResourceModel('admin/acl')->loadAcl());
         }
         if ($user->getReloadAclFlag()) {
-            $user->unsetData('password');
-            $user->setReloadAclFlag('0')->save();
+            $user->getResource()->saveReloadAclFlag($user, 0);
         }
         return $this;
     }
@@ -233,7 +254,7 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      * Setter whether the current/next page should be treated as first page after login
      *
      * @param bool $value
-     * @return Mage_Admin_Model_Session
+     * @return $this
      */
     public function setIsFirstPageAfterLogin($value)
     {
@@ -255,6 +276,31 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             return $request->getRequestUri();
         } else {
             return null;
+        }
+    }
+
+    /**
+     * Login failed process
+     *
+     * @param Exception $e
+     * @param string $username
+     * @param string $message
+     * @param Mage_Core_Controller_Request_Http $request
+     * @return void
+     */
+    protected function _loginFailed($e, $request, $username, $message)
+    {
+        try {
+            Mage::dispatchEvent('admin_session_user_login_failed', array(
+                'user_name' => $username,
+                'exception' => $e
+            ));
+        } catch (Exception $e) {
+        }
+
+        if ($request && !$request->getParam('messageSent')) {
+            Mage::getSingleton('adminhtml/session')->addError($message);
+            $request->setParam('messageSent', true);
         }
     }
 }

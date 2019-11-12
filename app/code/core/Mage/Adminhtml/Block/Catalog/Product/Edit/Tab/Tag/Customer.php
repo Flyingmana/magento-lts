@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -69,6 +69,11 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
             'index'     => 'firstname',
         ));
 
+        $this->addColumn('middlename', array(
+            'header'        => Mage::helper('catalog')->__('Middle Name'),
+            'index'         => 'middlename',
+        ));
+
         $this->addColumn('lastname', array(
             'header'        => Mage::helper('catalog')->__('Last Name'),
             'index'         => 'lastname',
@@ -89,7 +94,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Tag_Customer extends Mage_Ad
 
     public function getRowUrl($row)
     {
-        return $this->getUrl('*/customer/edit', array('id' => $row->getCustomerId()));
+        return $this->getUrl('*/customer/edit', array('id' => $row->getEntityId()));
     }
 
     public function getGridUrl()

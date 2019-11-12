@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_HTTP
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,8 +91,8 @@ implements Mage_HTTP_IClient
 
 
     /**
-     * Request timeout
-     * @var intunknown_type
+     * Request timeout in seconds
+     * @var int
      */
     protected $_timeout = 300;
 
@@ -126,7 +126,7 @@ implements Mage_HTTP_IClient
     protected $_headerCount = 0;
 
     /**
-     * Set request timeout, msec
+     * Set request timeout in seconds
      *
      * @param int $value
      */
@@ -477,7 +477,7 @@ implements Mage_HTTP_IClient
      */
     protected function curlOptions($array)
     {
-        curl_setopt_array($this->_ch, $arr);
+        curl_setopt_array($this->_ch, $array);
     }
 
     /**

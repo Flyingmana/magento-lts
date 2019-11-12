@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -385,7 +385,7 @@ class Mage_Core_Model_Cache
      * @param string $data
      * @param string $id
      * @param array $tags
-     * @param int $lifeTime
+     * @param null|false|int $lifeTime
      * @return bool
      */
     public function save($data, $id, $tags = array(), $lifeTime = null)
@@ -469,7 +469,7 @@ class Mage_Core_Model_Cache
     /**
      * Initialize cache types options
      *
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     protected function _initOptions()
     {
@@ -499,7 +499,7 @@ class Mage_Core_Model_Cache
      * Save cache usage options
      *
      * @param array $options
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     public function saveOptions($options)
     {
@@ -512,7 +512,7 @@ class Mage_Core_Model_Cache
      * Check if cache can be used for specific data type
      *
      * @param string $typeCode
-     * @return bool
+     * @return bool|array
      */
     public function canUse($typeCode)
     {
@@ -535,7 +535,7 @@ class Mage_Core_Model_Cache
      * Disable cache usage for specific data type
      *
      * @param string $typeCode
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     public function banUse($typeCode)
     {
@@ -605,7 +605,7 @@ class Mage_Core_Model_Cache
      * Save invalidated cache types
      *
      * @param array $types
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     protected function _saveInvalidatedTypes($types)
     {
@@ -637,7 +637,7 @@ class Mage_Core_Model_Cache
      * Mark specific cache type(s) as invalidated
      *
      * @param string|array $typeCode
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     public function invalidateType($typeCode)
     {
@@ -656,7 +656,7 @@ class Mage_Core_Model_Cache
      * Clean cached data for specific cache type
      *
      * @param string $typeCode
-     * @return Mage_Core_Model_Cache
+     * @return $this
      */
     public function cleanType($typeCode)
     {

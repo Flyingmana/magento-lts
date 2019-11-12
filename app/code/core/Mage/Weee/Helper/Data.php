@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Weee
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -281,7 +281,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
      * @param array                                $value
-     * @return Mage_Weee_Helper_Data
+     * @return $this
      */
     public function setApplied($item, $value)
     {
@@ -388,7 +388,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @param array                      $tierPrices
      * @param boolean                    $includeIndex
-     * @return Mage_Weee_Helper_Data
+     * @return $this
      */
     public function processTierPrices($product, &$tierPrices, $includeIndex = true)
     {
@@ -645,7 +645,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             $weeeAmountInclDiscount += $weeeTaxAppliedAmount['row_amount'];
             if (!$this->includeInSubtotal()) {
-                $weeeAmountInclDiscount -= $weeeTaxAppliedAmount['weee_discount'];
+                $weeeAmountInclDiscount -= isset($weeeTaxAppliedAmount['weee_discount'])
+                    ? $weeeTaxAppliedAmount['weee_discount'] : 0;
             }
         }
         return $weeeAmountInclDiscount;
@@ -666,7 +667,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             $baseWeeeAmountInclDiscount += $weeeTaxAppliedAmount['base_row_amount'];
             if (!$this->includeInSubtotal()) {
-                $baseWeeeAmountInclDiscount -= $weeeTaxAppliedAmount['base_weee_discount'];
+                $baseWeeeAmountInclDiscount -= isset($weeeTaxAppliedAmount['base_weee_discount'])
+                    ? $weeeTaxAppliedAmount['base_weee_discount'] : 0;
             }
         }
         return $baseWeeeAmountInclDiscount;

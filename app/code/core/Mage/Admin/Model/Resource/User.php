@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Admin
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,7 +45,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     /**
      * Initialize unique fields
      *
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     protected function _initUniqueFields()
     {
@@ -66,7 +66,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Authenticate user by $username and $password
      *
      * @param Mage_Admin_Model_User $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     public function recordLogin(Mage_Admin_Model_User $user)
     {
@@ -157,7 +157,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Set created/modified values before user save
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
@@ -173,11 +173,11 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Unserialize user extra data after user save
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     protected function _afterSave(Mage_Core_Model_Abstract $user)
     {
-        $user->setExtra(unserialize($user->getExtra()));
+        $this->_unserializeExtraData($user);
         return $this;
     }
 
@@ -185,14 +185,11 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Unserialize user extra data after user load
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     protected function _afterLoad(Mage_Core_Model_Abstract $user)
     {
-        if (is_string($user->getExtra())) {
-            $user->setExtra(unserialize($user->getExtra()));
-        }
-        return parent::_afterLoad($user);
+        return parent::_afterLoad($this->_unserializeExtraData($user));
     }
 
     /**
@@ -215,14 +212,14 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
 
             $adapter->delete($this->getMainTable(), $conditions);
             $adapter->delete($this->getTable('admin/role'), $conditions);
+            $adapter->commit();
         } catch (Mage_Core_Exception $e) {
+            $adapter->rollBack();
             throw $e;
-            return false;
         } catch (Exception $e) {
             $adapter->rollBack();
             return false;
         }
-        $adapter->commit();
         $this->_afterDelete($user);
         return true;
     }
@@ -231,7 +228,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * TODO: unify _saveRelations() and add() methods, they make same things
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     public function _saveRelations(Mage_Core_Model_Abstract $user)
     {
@@ -273,6 +270,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
             }
             $adapter->commit();
         } catch (Mage_Core_Exception $e) {
+            $adapter->rollBack();
             throw $e;
         } catch (Exception $e) {
             $adapter->rollBack();
@@ -322,7 +320,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Save user roles
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     public function add(Mage_Core_Model_Abstract $user)
     {
@@ -366,7 +364,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      * Delete user role
      *
      * @param Mage_Core_Model_Abstract $user
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     public function deleteFromRole(Mage_Core_Model_Abstract $user)
     {
@@ -445,7 +443,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
      *
      * @param Mage_Core_Model_Abstract $object
      * @param string $data
-     * @return Mage_Admin_Model_Resource_User
+     * @return $this
      */
     public function saveExtra($object, $data)
     {
@@ -458,5 +456,42 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         }
 
         return $this;
+    }
+
+    /**
+     * Set reload ACL flag
+     *
+     * @param Mage_Core_Model_Abstract $object
+     * @param int $flag
+     * @return $this
+     */
+    public function saveReloadAclFlag($object, $flag)
+    {
+        if ($object->getId()) {
+            $this->_getWriteAdapter()->update(
+                $this->getMainTable(),
+                array('reload_acl_flag' => $flag),
+                array('user_id = ?' => (int) $object->getId())
+            );
+        }
+
+        return $this;
+    }
+
+    /**
+     * Unserializes user extra data
+     *
+     * @param Mage_Core_Model_Abstract $user
+     * @return Mage_Core_Model_Abstract
+     */
+    protected function _unserializeExtraData(Mage_Core_Model_Abstract $user)
+    {
+        try {
+            $unsterilizedData = Mage::helper('core/unserializeArray')->unserialize($user->getExtra());
+            $user->setExtra($unsterilizedData);
+        } catch (Exception $e) {
+            $user->setExtra(false);
+        }
+        return $user;
     }
 }

@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -243,7 +243,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Prepare data before save
      *
-     * @return Mage_Sales_Model_Order_Item
+     * @return $this
      */
     protected function _beforeSave()
     {
@@ -276,7 +276,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Get parent item
      *
-     * @return Mage_Sales_Model_Order_Item || null
+     * @return $this || null
      */
     public function getParentItem()
     {
@@ -542,7 +542,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     /**
      * Cancel order item
      *
-     * @return Mage_Sales_Model_Order_Item
+     * @return $this
      */
     public function cancel()
     {
@@ -820,6 +820,9 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     {
         $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
+        if (!is_array($weeeTaxAppliedAmounts)) {
+            return $totalDiscount;
+        }
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             if (isset($weeeTaxAppliedAmount['total_base_weee_discount'])) {
                 return $weeeTaxAppliedAmount['total_base_weee_discount'];
@@ -840,6 +843,9 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     {
         $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
+        if (!is_array($weeeTaxAppliedAmounts)) {
+            return $totalDiscount;
+        }
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             if (isset($weeeTaxAppliedAmount['total_weee_discount'])) {
                 return $weeeTaxAppliedAmount['total_weee_discount'];

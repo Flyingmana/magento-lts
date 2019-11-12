@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Paypal
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -520,7 +520,8 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      * @var array
      */
     protected $_requiredResponseParams = array(
-        self::DO_DIRECT_PAYMENT => array('ACK', 'CORRELATIONID', 'AMT')
+        self::DO_DIRECT_PAYMENT             => array('ACK', 'CORRELATIONID', 'AMT'),
+        self::DO_EXPRESS_CHECKOUT_PAYMENT   => array('ACK', 'CORRELATIONID', 'AMT'),
     );
 
     /**
@@ -709,7 +710,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      * DoAuthorization call
      *
      * @link https://cms.paypal.com/us/cgi-bin/?&cmd=_render-content&content_ID=developer/e_howto_api_nvp_r_DoAuthorization
-     * @return Mage_Paypal_Model_Api_Nvp
+     * @return $this
      */
     public function callDoAuthorization()
     {
@@ -1013,7 +1014,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      * Setter for 'raw response needed' flag
      *
      * @param bool $flag
-     * @return Mage_Paypal_Model_Api_Nvp
+     * @return $this
      */
     public function setRawResponseNeeded($flag)
     {

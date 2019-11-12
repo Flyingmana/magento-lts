@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,11 +39,16 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
     const MAXIMUM_AVAILABLE_NUMBER = 99999999;
 
     /**
+     * Default precision for price calculations
+     */
+    const PRECISION_VALUE = 0.0001;
+
+    /**
      * Check quote amount
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @param decimal $amount
-     * @return Mage_Sales_Helper_Data
+     * @param float $amount
+     * @return $this
      */
     public function checkQuoteAmount(Mage_Sales_Model_Quote $quote, $amount)
     {

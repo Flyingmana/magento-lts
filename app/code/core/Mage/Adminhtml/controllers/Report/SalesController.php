@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Adminhtml
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,7 +36,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Add report/sales breadcrumbs
      *
-     * @return Mage_Adminhtml_Report_SalesController
+     * @return $this
      */
     public function _initAction()
     {
@@ -124,7 +124,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
      * Refresh statistics for last 25 hours
      *
      * @deprecated after 1.4.0.1
-     * @return Mage_Adminhtml_Report_SalesController
+     * @return $this
      */
     public function refreshRecentAction()
     {
@@ -135,7 +135,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
      * Refresh statistics for all period
      *
      * @deprecated after 1.4.0.1
-     * @return Mage_Adminhtml_Report_SalesController
+     * @return $this
      */
     public function refreshLifetimeAction()
     {
@@ -389,7 +389,8 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
 
     protected function _isAllowed()
     {
-        switch ($this->getRequest()->getActionName()) {
+        $action = strtolower($this->getRequest()->getActionName());
+        switch ($action) {
             case 'sales':
                 return $this->_getSession()->isAllowed('report/salesroot/sales');
                 break;
@@ -407,9 +408,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
                 break;
             case 'coupons':
                 return $this->_getSession()->isAllowed('report/salesroot/coupons');
-                break;
-            case 'shipping':
-                return $this->_getSession()->isAllowed('report/salesroot/shipping');
                 break;
             case 'bestsellers':
                 return $this->_getSession()->isAllowed('report/products/bestsellers');

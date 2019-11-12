@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Eav
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Attributes array by attribute name
      *
-     * @var unknown_type
+     * @var array
      */
     protected $_attributesByCode            = array();
 
@@ -504,7 +504,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve configuration for all attributes
      *
-     * @return Mage_Eav_Model_Entity_Attribute_Abstract
+     * @return $this
      */
     public function loadAllAttributes($object=null)
     {
@@ -808,13 +808,13 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @see Mage_Eav_Model_Entity_Abstract::getAttribute for $attribute format
      * @param integer|string|Mage_Eav_Model_Entity_Attribute_Abstract $attribute
+     *
      * @return boolean
      */
     public function isAttributeStatic($attribute)
     {
-        $attrInstance       = $this->getAttribute($attribute);
-        $attrBackendStatic  = $attrInstance->getBackend()->isStatic();
-        return $attrInstance && $attrBackendStatic;
+        $attrInstance = $this->getAttribute($attribute);
+        return $attrInstance && $attrInstance->getBackend()->isStatic();
     }
 
     /**
@@ -1067,20 +1067,6 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Initialize attribute value for object
      *
-     * @deprecated after 1.5.1.0 - mistake in method name
-     *
-     * @param   Varien_Object $object
-     * @param   array $valueRow
-     * @return  Mage_Eav_Model_Entity_Abstract
-     */
-    protected function _setAttribteValue($object, $valueRow)
-    {
-        return _setAttributeValue($object, $valueRow);
-    }
-
-    /**
-     * Initialize attribute value for object
-     *
      * @param   Varien_Object $object
      * @param   array $valueRow
      * @return  Mage_Eav_Model_Entity_Abstract
@@ -1306,9 +1292,11 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _processSaveData($saveData)
     {
-        extract($saveData);
+        $this->_attributeValuesToSave   = array();
+        $this->_attributeValuesToDelete = array();
+
         /**
-         * Import variables into the current symbol table from save data array
+         * Import variables from save data array
          *
          * @see Mage_Eav_Model_Entity_Attribute_Abstract::_collectSaveData()
          *
@@ -1318,6 +1306,12 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
          * @var array $update
          * @var array $delete
          */
+        $newObject = $saveData['newObject'];
+        $entityRow = $saveData['entityRow'];
+        $insert    = $saveData['insert'];
+        $update    = $saveData['update'];
+        $delete    = $saveData['delete'];
+
         $adapter        = $this->_getWriteAdapter();
         $insertEntity   = true;
         $entityTable    = $this->getEntityTable();
@@ -1458,18 +1452,24 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     protected function _processAttributeValues()
     {
-        $adapter = $this->_getWriteAdapter();
-        foreach ($this->_attributeValuesToSave as $table => $data) {
-            $adapter->insertOnDuplicate($table, $data, array('value'));
-        }
+        try {
+            $adapter = $this->_getWriteAdapter();
+            foreach ($this->_attributeValuesToSave as $table => $data) {
+                $adapter->insertOnDuplicate($table, $data, array('value'));
+            }
 
-        foreach ($this->_attributeValuesToDelete as $table => $valueIds) {
-            $adapter->delete($table, array('value_id IN (?)' => $valueIds));
-        }
+            foreach ($this->_attributeValuesToDelete as $table => $valueIds) {
+                $adapter->delete($table, array('value_id IN (?)' => $valueIds));
+            }
 
-        // reset data arrays
-        $this->_attributeValuesToSave   = array();
-        $this->_attributeValuesToDelete = array();
+            // reset data arrays
+            $this->_attributeValuesToSave   = array();
+            $this->_attributeValuesToDelete = array();
+        } catch (Exception $e) {
+            $this->_attributeValuesToSave   = array();
+            $this->_attributeValuesToDelete = array();
+            throw $e;
+        }
 
         return $this;
     }
@@ -1501,7 +1501,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      * @param   Varien_Object $object
      * @param   string $table
      * @param   array $info
-     * @return  Varien_Object
+     * @return  $this
      */
     protected function _deleteAttributes($object, $table, $info)
     {
@@ -1532,6 +1532,9 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      */
     public function saveAttribute(Varien_Object $object, $attributeCode)
     {
+        $this->_attributeValuesToSave   = array();
+        $this->_attributeValuesToDelete = array();
+
         $attribute      = $this->getAttribute($attributeCode);
         $backend        = $attribute->getBackend();
         $table          = $backend->getTable();
@@ -1574,7 +1577,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
             $this->_processAttributeValues();
             $adapter->commit();
         } catch (Exception $e) {
-            $adapter->rollback();
+            $adapter->rollBack();
             throw $e;
         }
 

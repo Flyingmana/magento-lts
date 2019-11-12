@@ -3,7 +3,7 @@
   "license": "OSL-3.0",
   "type": "magento-source",
   "require": {
-    "php": ">=5.2.13",
+    "php": ">=7.0 <7.3",
     "magento-hackathon/magento-composer-installer": "*"
   },
   "authors": [
@@ -12,6 +12,11 @@
       "email": "lee.saferite@aoe.com",
       "role": "Maintainer"
     },
+      {
+        "name": "Daniel Fahlke aka Flyingmana",
+        "email": "flyingmana@googlemail.com",
+        "role": "Maintainer"
+      },
     {
       "name": "David Robinson",
       "email": "david.robinson@aoe.com",

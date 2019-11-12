@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Customer
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -124,7 +124,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      * Set customer id
      *
      * @param int|null $id
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function setCustomerId($id)
     {
@@ -149,7 +149,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      * Set customer group id
      *
      * @param int|null $id
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function setCustomerGroupId($id)
     {
@@ -222,6 +222,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     {
         $this->setCustomer($customer);
         $this->renewSession();
+        Mage::getSingleton('core/session')->renewFormKey();
         Mage::dispatchEvent('customer_login', array('customer'=>$customer));
         return $this;
     }
@@ -245,7 +246,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Logout customer
      *
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function logout()
     {
@@ -286,7 +287,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      *
      * @param string $key
      * @param string $url
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     protected function _setAuthUrl($key, $url)
     {
@@ -300,13 +301,14 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Logout without dispatching event
      *
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     protected function _logout()
     {
         $this->setId(null);
         $this->setCustomerGroupId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         $this->getCookie()->delete($this->getSessionName());
+        Mage::getSingleton('core/session')->renewFormKey();
         return $this;
     }
 
@@ -314,7 +316,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      * Set Before auth url
      *
      * @param string $url
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function setBeforeAuthUrl($url)
     {
@@ -325,7 +327,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
      * Set After auth url
      *
      * @param string $url
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function setAfterAuthUrl($url)
     {
@@ -335,7 +337,7 @@ class Mage_Customer_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Reset core session hosts after reseting session ID
      *
-     * @return Mage_Customer_Model_Session
+     * @return $this
      */
     public function renewSession()
     {

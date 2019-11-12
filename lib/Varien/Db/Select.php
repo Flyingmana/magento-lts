@@ -20,7 +20,7 @@
  *
  * @category    Varien
  * @package     Varien_Db
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -102,7 +102,7 @@ class Varien_Db_Select extends Zend_Db_Select
      *
      * @param string   $cond  The WHERE condition.
      * @param string   $value OPTIONAL A single value to quote into the condition.
-     * @param constant $type  OPTIONAL The type of the given value
+     * @param null|string $type  OPTIONAL The type of the given value
      * @return Varien_Db_Select This Zend_Db_Select object.
      */
     public function where($cond, $value = null, $type = null)

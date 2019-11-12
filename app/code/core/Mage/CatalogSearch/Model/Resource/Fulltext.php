@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_CatalogSearch
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,9 +77,10 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      */
     protected $_allowTableChanges       = true;
 
-
-
-
+    /**
+     * @var array
+     */
+    protected $_foundData = array();
 
     /**
      * Init resource model
@@ -106,7 +107,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      *
      * @param  int|null $storeId
      * @param  int|array|null $productIds
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function rebuildIndex($storeId = null, $productIds = null)
     {
@@ -127,7 +128,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      *
      * @param int $storeId Store View Id
      * @param int|array $productIds Product Entity Id
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     protected function _rebuildStoreIndex($storeId, $productIds = null)
     {
@@ -294,16 +295,11 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     /**
      * Reset search results
      *
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function resetSearchResults()
     {
-        $adapter = $this->_getWriteAdapter();
-        $adapter->update($this->getTable('catalogsearch/search_query'), array('is_processed' => 0));
-        $adapter->delete($this->getTable('catalogsearch/result'));
-
         Mage::dispatchEvent('catalogsearch_reset_search_result');
-
         return $this;
     }
 
@@ -312,7 +308,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      *
      * @param int $storeId Store View Id
      * @param int $productId Product Entity Id
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function cleanIndex($storeId = null, $productId = null)
     {
@@ -329,73 +325,75 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      * @param Mage_CatalogSearch_Model_Fulltext $object
      * @param string $queryText
      * @param Mage_CatalogSearch_Model_Query $query
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function prepareResult($object, $queryText, $query)
     {
         $adapter = $this->_getWriteAdapter();
-        if (!$query->getIsProcessed()) {
-            $searchType = $object->getSearchType($query->getStoreId());
+        $searchType = $object->getSearchType($query->getStoreId());
 
-            $preparedTerms = Mage::getResourceHelper('catalogsearch')
-                ->prepareTerms($queryText, $query->getMaxQueryWords());
+        $preparedTerms = Mage::getResourceHelper('catalogsearch')
+            ->prepareTerms($queryText, $query->getMaxQueryWords());
 
-            $bind = array();
-            $like = array();
-            $likeCond  = '';
-            if ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE
-                || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
-            ) {
-                $helper = Mage::getResourceHelper('core');
-                $words = Mage::helper('core/string')->splitWords($queryText, true, $query->getMaxQueryWords());
-                foreach ($words as $word) {
-                    $like[] = $helper->getCILike('s.data_index', $word, array('position' => 'any'));
-                }
-                if ($like) {
-                    $likeCond = '(' . join(' OR ', $like) . ')';
-                }
-            }
-            $mainTableAlias = 's';
-            $fields = array(
-                'query_id' => new Zend_Db_Expr($query->getId()),
-                'product_id',
-            );
-            $select = $adapter->select()
-                ->from(array($mainTableAlias => $this->getMainTable()), $fields)
-                ->joinInner(array('e' => $this->getTable('catalog/product')),
-                    'e.entity_id = s.product_id',
-                    array())
-                ->where($mainTableAlias.'.store_id = ?', (int)$query->getStoreId());
-
-            if ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_FULLTEXT
-                || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
-            ) {
-                $bind[':query'] = implode(' ', $preparedTerms[0]);
-                $where = Mage::getResourceHelper('catalogsearch')
-                    ->chooseFulltext($this->getMainTable(), $mainTableAlias, $select);
+        $bind = array();
+        $like = array();
+        $likeCond = '';
+        if ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE
+            || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
+        ) {
+            $helper = Mage::getResourceHelper('core');
+            $words = Mage::helper('core/string')->splitWords($queryText, true, $query->getMaxQueryWords());
+            foreach ($words as $word) {
+                $like[] = $helper->getCILike('s.data_index', $word, array('position' => 'any'));
             }
 
-            if ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE) {
-                    $where .= ($where ? ' OR ' : '') . $likeCond;
-            } elseif ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE) {
-                $select->columns(array('relevance'  => new Zend_Db_Expr(0)));
-                $where = $likeCond;
+            if ($like) {
+                $likeCond = '(' . join(' OR ', $like) . ')';
             }
-
-            if ($where != '') {
-                $select->where($where);
-            }
-
-            $sql = $adapter->insertFromSelect($select,
-                $this->getTable('catalogsearch/result'),
-                array(),
-                Varien_Db_Adapter_Interface::INSERT_ON_DUPLICATE);
-            $adapter->query($sql, $bind);
-
-            $query->setIsProcessed(1);
         }
 
+        $mainTableAlias = 's';
+        $fields = array('product_id');
+
+        $select = $adapter->select()
+            ->from(array($mainTableAlias => $this->getMainTable()), $fields)
+            ->joinInner(array('e' => $this->getTable('catalog/product')),
+                'e.entity_id = s.product_id',
+                array())
+            ->where($mainTableAlias . '.store_id = ?', (int)$query->getStoreId());
+
+        $where = "";
+        if ($searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_FULLTEXT
+            || $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE
+        ) {
+            $bind[':query'] = implode(' ', $preparedTerms[0]);
+            $where = Mage::getResourceHelper('catalogsearch')
+                ->chooseFulltext($this->getMainTable(), $mainTableAlias, $select);
+        }
+        if ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_COMBINE) {
+            $where .= ($where ? ' OR ' : '') . $likeCond;
+        } elseif ($likeCond != '' && $searchType == Mage_CatalogSearch_Model_Fulltext::SEARCH_TYPE_LIKE) {
+            $select->columns(array('relevance' => new Zend_Db_Expr(0)));
+            $where = $likeCond;
+        }
+
+        if ($where != '') {
+            $select->where($where);
+        }
+
+        $this->_foundData = $adapter->fetchPairs($select, $bind);
+
         return $this;
+    }
+
+    /**
+     * Retrieve found data
+     *
+     * @return array
+     */
+    public function getFoundData()
+    {
+        return $this->_foundData;
     }
 
     /**
@@ -772,7 +770,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      * @param int $productId
      * @param int $storeId
      * @param string $index
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     protected function _saveProductIndex($productId, $storeId, $index)
     {
@@ -788,7 +786,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      *
      * @param int $storeId
      * @param array $productIndexes
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     protected function _saveProductIndexes($storeId, $productIndexes)
     {
@@ -839,7 +837,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
      *
      * @deprecated after 1.6.1.0
      * @param bool $value
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function setAllowTableChanges($value = true)
     {
@@ -850,11 +848,11 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     /**
      * Update category products indexes
      *
-     * deprecated after 1.6.2.0
+     * @deprecated after 1.6.2.0
      *
      * @param array $productIds
      * @param array $categoryIds
-     * @return Mage_CatalogSearch_Model_Resource_Fulltext
+     * @return $this
      */
     public function updateCategoryIndex($productIds, $categoryIds)
     {

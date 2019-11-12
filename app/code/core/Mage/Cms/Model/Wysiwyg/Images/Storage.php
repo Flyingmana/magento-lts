@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Cms
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -89,7 +89,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         foreach ($collection as $key => $value) {
             $rootChildParts = explode(DIRECTORY_SEPARATOR, substr($value->getFilename(), $storageRootLength));
 
-            if (array_key_exists($rootChildParts[0], $conditions['plain'])
+            if (array_key_exists(end($rootChildParts), $conditions['plain'])
                 || ($regExp && preg_match($regExp, $value->getFilename()))) {
                 $collection->removeItemByKey($key);
             }
@@ -137,7 +137,9 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             $item->setUrl($helper->getCurrentUrl() . $item->getBasename());
 
             if ($this->isImage($item->getBasename())) {
-                $thumbUrl = $this->getThumbnailUrl($item->getFilename(), true);
+                $thumbUrl = $this->getThumbnailUrl(
+                    Mage_Core_Model_File_Uploader::getCorrectFileName($item->getFilename()),
+                    true);
                 // generate thumbnail "on the fly" if it does not exists
                 if(! $thumbUrl) {
                     $thumbUrl = Mage::getSingleton('adminhtml/url')->getUrl('*/*/thumbnail', array('file' => $item->getId()));
@@ -227,17 +229,18 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         $rootCmp = rtrim($this->getHelper()->getStorageRoot(), DS);
         $pathCmp = rtrim($path, DS);
 
-        if ($rootCmp == $pathCmp) {
-            Mage::throwException(Mage::helper('cms')->__('Cannot delete root directory %s.', $path));
-        }
-
         $io = new Varien_Io_File();
+
+        if ($rootCmp == $pathCmp) {
+            Mage::throwException(Mage::helper('cms')->__('Cannot delete root directory %s.',
+                $io->getFilteredPath($path)));
+        }
 
         if (Mage::helper('core/file_storage_database')->checkDbUsage()) {
             Mage::getModel('core/file_storage_directory_database')->deleteDirectory($path);
         }
         if (!$io->rmdir($path, true)) {
-            Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $path));
+            Mage::throwException(Mage::helper('cms')->__('Cannot delete directory %s.', $io->getFilteredPath($path)));
         }
 
         if (strpos($pathCmp, $rootCmp) === 0) {
@@ -249,7 +252,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      * Delete file (and its thumbnail if exists) from storage
      *
      * @param string $target File path to be deleted
-     * @return Mage_Cms_Model_Wysiwyg_Images_Storage
+     * @return $this
      */
     public function deleteFile($target)
     {
@@ -282,6 +285,13 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         }
         $uploader->setAllowRenameFiles(true);
         $uploader->setFilesDispersion(false);
+        if ($type == 'image') {
+            $uploader->addValidateCallback(
+                Mage_Core_Model_File_Validator_Image::NAME,
+                Mage::getModel('core/file_validator_image'),
+                'validate'
+            );
+        }
         $result = $uploader->save($targetPath);
 
         if (!$result) {
@@ -289,8 +299,9 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         }
 
         // create thumbnail
-        $this->resizeFile($targetPath . DS . $uploader->getUploadedFileName(), true);
-
+        if ($type == 'image') {
+            $this->resizeFile($targetPath . DS . $uploader->getUploadedFileName(), true);
+        }
         $result['cookie'] = array(
             'name'     => session_name(),
             'value'    => $this->getSession()->getSessionId(),
@@ -333,14 +344,17 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      */
     public function getThumbnailUrl($filePath, $checkFile = false)
     {
-        $mediaRootDir = $this->getHelper()->getStorageRoot();
+        $mediaRootDir = Mage::getConfig()->getOptions()->getMediaDir() . DS;
 
         if (strpos($filePath, $mediaRootDir) === 0) {
-            $thumbSuffix = self::THUMBS_DIRECTORY_NAME . DS . substr($filePath, strlen($mediaRootDir));
+            $thumbSuffix = self::THUMBS_DIRECTORY_NAME . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY
+                . DS . substr($filePath, strlen($mediaRootDir));
 
-            if (! $checkFile || is_readable($mediaRootDir . $thumbSuffix)) {
+            if (! $checkFile || is_readable($this->getHelper()->getStorageRoot() . $thumbSuffix)) {
                 $randomIndex = '?rand=' . time();
-                return str_replace('\\', '/', $this->getHelper()->getBaseUrl() . $thumbSuffix) . $randomIndex;
+                $thumbUrl = $this->getHelper()->getBaseUrl() . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY
+                    . DS . $thumbSuffix;
+                return str_replace('\\', '/', $thumbUrl) . $randomIndex;
             }
         }
 
@@ -374,7 +388,9 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         $height = $this->getConfigData('resize_height');
         $image->keepAspectRatio($keepRation);
         $image->resize($width, $height);
-        $dest = $targetDir . DS . pathinfo($source, PATHINFO_BASENAME);
+        $dest = $targetDir
+            . DS
+            . Mage_Core_Model_File_Uploader::getCorrectFileName(pathinfo($source, PATHINFO_BASENAME));
         $image->save($dest);
         if (is_file($dest)) {
             return $dest;

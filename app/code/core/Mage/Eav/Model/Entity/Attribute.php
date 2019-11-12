@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Eav
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -134,7 +134,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Prepare data for save
      *
-     * @return Mage_Eav_Model_Entity_Attribute
+     * @return $this
      * @throws Mage_Eav_Exception
      */
     protected function _beforeSave()
@@ -204,7 +204,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     /**
      * Save additional data
      *
-     * @return Mage_Eav_Model_Entity_Attribute
+     * @return $this
      */
     protected function _afterSave()
     {
@@ -225,12 +225,12 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             case 'text':
             case 'gallery':
             case 'media_image':
-            case 'multiselect':
                 $field = 'varchar';
                 break;
 
             case 'image':
             case 'textarea':
+            case 'multiselect':
                 $field = 'text';
                 break;
 
@@ -272,6 +272,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
             case 'text':
             case 'price':
             case 'image':
+            case 'weight':
                 $field = 'default_value_text';
                 break;
 

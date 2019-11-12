@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,8 +44,6 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright   Copyright (c) 2011 Magento Inc. (http://www.magentocommerce.com)
- * @license     http://www.magentocommerce.com/license/enterprise-edition
  */
 class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 {
@@ -79,7 +77,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Save bind recipients to message
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     protected function _afterSave()
     {
@@ -90,7 +88,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Validate recipients before saving
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     protected function _beforeSave()
     {
@@ -103,7 +101,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Add message to queue
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function addMessageToQueue()
     {
@@ -127,7 +125,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      * @param array|string|null $names
      * @param int $type
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function addRecipients($emails, $names = null, $type = self::EMAIL_TYPE_TO)
     {
@@ -149,7 +147,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Clean recipients data from object
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function clearRecipients()
     {
@@ -162,7 +160,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @param array $recipients
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function setRecipients(array $recipients)
     {
@@ -183,7 +181,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Send all messages in a queue
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function send()
     {
@@ -225,7 +223,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                 if ($parameters->getIsPlain()) {
                     $mailer->setBodyText($message->getMessageBody());
                 } else {
-                    $mailer->setBodyHTML($message->getMessageBody());
+                    $mailer->setBodyHtml($message->getMessageBody());
                 }
 
                 $mailer->setSubject('=?utf-8?B?' . base64_encode($parameters->getSubject()) . '?=');
@@ -239,19 +237,13 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
                 try {
                     $mailer->send();
-                    unset($mailer);
-                    $message->setProcessedAt(Varien_Date::formatDate(true));
-                    $message->save();
-                }
-                catch (Exception $e) {
-                    unset($mailer);
-                    $oldDevMode = Mage::getIsDeveloperMode();
-                    Mage::setIsDeveloperMode(true);
+                } catch (Exception $e) {
                     Mage::logException($e);
-                    Mage::setIsDeveloperMode($oldDevMode);
-
-                    return false;
                 }
+
+                unset($mailer);
+                $message->setProcessedAt(Varien_Date::formatDate(true));
+                $message->save();
             }
         }
 
@@ -261,7 +253,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
     /**
      * Clean queue from sent messages
      *
-     * @return Mage_Core_Model_Email_Queue
+     * @return $this
      */
     public function cleanQueue()
     {

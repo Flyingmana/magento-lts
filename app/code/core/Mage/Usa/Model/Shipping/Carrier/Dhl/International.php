@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Usa
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -679,11 +679,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
                 }
                 unset($items[$key]);
                 $sumWeight = $weight;
-                foreach ($items as $key => $weight) {
-                    if (($sumWeight + $weight) < $maxWeight) {
-                        unset($items[$key]);
-                        $sumWeight += $weight;
-                    } elseif (($sumWeight + $weight) > $maxWeight) {
+                foreach ($items as $keyItem => $weightItem) {
+                    if (($sumWeight + $weightItem) < $maxWeight) {
+                        unset($items[$keyItem]);
+                        $sumWeight += $weightItem;
+                    } elseif (($sumWeight + $weightItem) > $maxWeight) {
                         $numberOfPieces++;
                         $nodePiece = $nodePieces->addChild('Piece', '', '');
                         $nodePiece->addChild('PieceID', $numberOfPieces);
@@ -691,9 +691,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
                         $nodePiece->addChild('Weight', $sumWeight);
                         break;
                     } else {
-                        unset($items[$key]);
+                        unset($items[$keyItem]);
                         $numberOfPieces++;
-                        $sumWeight += $weight;
+                        $sumWeight += $weightItem;
                         $nodePiece = $nodePieces->addChild('Piece', '', '');
                         $nodePiece->addChild('PieceID', $numberOfPieces);
                         $this->_addDimension($nodePiece);
@@ -837,7 +837,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
     {
         $client = new Varien_Http_Client();
         $client->setUri((string)$this->getConfigData('gateway_url'));
-        $client->setConfig(array('maxredirects' => 0, 'timeout' => 30));
+        $client->setConfig(array(
+            'maxredirects' => 0,
+            'timeout' => 30,
+            'verifypeer' => $this->getConfigFlag('verify_peer'),
+            'verifyhost' => 2,
+        ));
         $client->setRawData(utf8_encode($request));
         return $client->request(Varien_Http_Client::POST)->getBody();
     }
@@ -1006,7 +1011,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
      * Add rate to DHL rates array
      *
      * @param SimpleXMLElement $shipmentDetails
-     * @return Mage_Usa_Model_Shipping_Carrier_Dhl_International
+     * @return $this
      */
     protected function _addRate(SimpleXMLElement $shipmentDetails)
     {
@@ -1411,7 +1416,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
             try {
                 $client = new Varien_Http_Client();
                 $client->setUri((string)$this->getConfigData('gateway_url'));
-                $client->setConfig(array('maxredirects' => 0, 'timeout' => 30));
+                $client->setConfig(array(
+                    'maxredirects' => 0,
+                    'timeout' => 30,
+                    'verifypeer' => $this->getConfigFlag('verify_peer'),
+                    'verifyhost' => 2,
+                ));
                 $client->setRawData($request);
                 $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
                 $debugData['result'] = $responseBody;
@@ -1603,7 +1613,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International
             try {
                 $client = new Varien_Http_Client();
                 $client->setUri((string)$this->getConfigData('gateway_url'));
-                $client->setConfig(array('maxredirects' => 0, 'timeout' => 30));
+                $client->setConfig(array(
+                    'maxredirects' => 0,
+                    'timeout' => 30,
+                    'verifypeer' => $this->getConfigFlag('verify_peer'),
+                    'verifyhost' => 2,
+                ));
                 $client->setRawData($request);
                 $responseBody = $client->request(Varien_Http_Client::POST)->getBody();
                 $debugData['result'] = $responseBody;

@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_HTTP
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -373,8 +373,8 @@ implements Mage_HTTP_IClient
         $uriModified = $this->getModifiedUri($uri, $https);
         $this->_ch = curl_init();
         $this->curlOption(CURLOPT_URL, $uriModified);
-        $this->curlOption(CURLOPT_SSL_VERIFYPEER, false);
-        $this->curlOption(CURLOPT_SSL_VERIFYHOST, 2);
+        $this->curlOption(CURLOPT_SSL_VERIFYPEER, true);
+       
         $this->getCurlMethodSettings($method, $params, $isAuthorizationRequired);
 
         if(count($this->_headers)) {
@@ -512,9 +512,9 @@ implements Mage_HTTP_IClient
 
     /**
      * Set curl options array directly
-     * @param array $array
+     * @param array $arr
      */
-    protected function curlOptions($array)
+    protected function curlOptions($arr)
     {
         curl_setopt_array($this->_ch, $arr);
     }

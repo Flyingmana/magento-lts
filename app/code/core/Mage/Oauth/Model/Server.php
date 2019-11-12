@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Oauth
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -209,7 +209,7 @@ class Mage_Oauth_Model_Server
      * Retrieve protocol and request parameters from request object
      *
      * @link http://tools.ietf.org/html/rfc5849#section-3.5
-     * @return Mage_Oauth_Model_Server
+     * @return $this
      */
     protected function _fetchParams()
     {
@@ -266,7 +266,7 @@ class Mage_Oauth_Model_Server
     /**
      * Retrieve protocol parameters from query string
      *
-     * @return Mage_Oauth_Model_Server
+     * @return $this
      */
     protected function _fetchProtocolParamsFromQuery()
     {
@@ -310,7 +310,7 @@ class Mage_Oauth_Model_Server
     /**
      * Load token object, validate it depending on request type, set access data and save
      *
-     * @return Mage_Oauth_Model_Server
+     * @return $this
      * @throws Mage_Oauth_Exception
      */
     protected function _initToken()
@@ -328,10 +328,10 @@ class Mage_Oauth_Model_Server
             if (self::REQUEST_TOKEN == $this->_requestType) {
                 $this->_validateVerifierParam();
 
-                if ($this->_token->getVerifier() != $this->_protocolParams['oauth_verifier']) {
+                if (!hash_equals($this->_token->getVerifier(), $this->_protocolParams['oauth_verifier'])) {
                     $this->_throwException('', self::ERR_VERIFIER_INVALID);
                 }
-                if ($this->_token->getConsumerId() != $this->_consumer->getId()) {
+                if (!hash_equals($this->_token->getConsumerId(), $this->_consumer->getId())) {
                     $this->_throwException('', self::ERR_TOKEN_REJECTED);
                 }
                 if (Mage_Oauth_Model_Token::TYPE_REQUEST != $this->_token->getType()) {
@@ -374,7 +374,7 @@ class Mage_Oauth_Model_Server
      * Extract parameters from sources (GET, FormBody, Authorization header), decode them and validate
      *
      * @param string $requestType Request type - one of REQUEST_... class constant
-     * @return Mage_Oauth_Model_Server
+     * @return $this
      * @throws Mage_Core_Exception
      */
     protected function _processRequest($requestType)
@@ -417,7 +417,7 @@ class Mage_Oauth_Model_Server
         if (self::REQUEST_INITIATE == $this->_requestType) {
             if (self::CALLBACK_ESTABLISHED == $this->_protocolParams['oauth_callback']
                 && $this->_consumer->getCallBackUrl()) {
-                $callbackUrl = $this->_consumer->getCallBackUrl();
+                $callbackUrl = $this->_consumer->getCallbackUrl();
             } else {
                 $callbackUrl = $this->_protocolParams['oauth_callback'];
             }
@@ -544,7 +544,7 @@ class Mage_Oauth_Model_Server
             $this->_request->getScheme() . '://' . $this->_request->getHttpHost() . $this->_request->getRequestUri()
         );
 
-        if ($calculatedSign != $this->_protocolParams['oauth_signature']) {
+        if (!hash_equals($calculatedSign, $this->_protocolParams['oauth_signature'])) {
             $this->_throwException('', self::ERR_SIGNATURE_INVALID);
         }
     }
@@ -709,7 +709,7 @@ class Mage_Oauth_Model_Server
      * Set response object
      *
      * @param Zend_Controller_Response_Http $response
-     * @return Mage_Oauth_Model_Server
+     * @return $this
      */
     public function setResponse(Zend_Controller_Response_Http $response)
     {

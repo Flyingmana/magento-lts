@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -407,6 +407,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if ($this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue) {
             /** @var $emailQueue Mage_Core_Model_Email_Queue */
             $emailQueue = $this->getQueue();
+            $emailQueue->clearRecipients();
             $emailQueue->setMessageBody($text);
             $emailQueue->setMessageParameters(array(
                     'subject'           => $subject,
@@ -441,7 +442,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
         if ($this->isPlain()) {
             $mail->setBodyText($text);
         } else {
-            $mail->setBodyHTML($text);
+            $mail->setBodyHtml($text);
         }
 
         $mail->setSubject('=?utf-8?B?' . base64_encode($subject) . '?=');
@@ -556,7 +557,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Set Return Path
      *
      * @param string $email
-     * @return Mage_Core_Model_Email_Template
+     * @return $this
      */
     public  function setReturnPath($email)
     {
@@ -568,7 +569,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      * Add Reply-To header
      *
      * @param string $email
-     * @return Mage_Core_Model_Email_Template
+     * @return $this
      */
     public function setReplyTo($email)
     {
@@ -622,7 +623,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     /**
      * Validate email template code
      *
-     * @return Mage_Core_Model_Email_Template
+     * @return $this
      */
     protected function _beforeSave()
     {

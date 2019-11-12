@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Checkout
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -102,7 +102,7 @@ class Mage_Checkout_Model_Type_Onepage
      * Declare checkout quote instance
      *
      * @param Mage_Sales_Model_Quote $quote
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     public function setQuote(Mage_Sales_Model_Quote $quote)
     {
@@ -123,7 +123,7 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Initialize quote state to be valid for one page checkout
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     public function initCheckout()
     {
@@ -137,12 +137,40 @@ class Mage_Checkout_Model_Type_Onepage
             }
         }
 
+        $quoteSave = false;
+        $collectTotals = false;
+
         /**
          * Reset multishipping flag before any manipulations with quote address
          * addAddress method for quote object related on this flag
          */
         if ($this->getQuote()->getIsMultiShipping()) {
             $this->getQuote()->setIsMultiShipping(false);
+            $quoteSave = true;
+        }
+
+        /**
+         *  Reset customer balance
+         */
+        if ($this->getQuote()->getUseCustomerBalance()) {
+            $this->getQuote()->setUseCustomerBalance(false);
+            $quoteSave = true;
+            $collectTotals = true;
+        }
+        /**
+         *  Reset reward points
+         */
+        if ($this->getQuote()->getUseRewardPoints()) {
+            $this->getQuote()->setUseRewardPoints(false);
+            $quoteSave = true;
+            $collectTotals = true;
+        }
+
+        if ($collectTotals) {
+            $this->getQuote()->collectTotals();
+        }
+
+        if ($quoteSave) {
             $this->getQuote()->save();
         }
 
@@ -334,6 +362,7 @@ class Mage_Checkout_Model_Type_Onepage
                         ->setShippingMethod($shippingMethod)
                         ->setCollectShippingRates(true);
                     $this->getCheckout()->setStepData('shipping', 'complete', true);
+                    $this->_setCartCouponCode();
                     break;
             }
         }
@@ -564,6 +593,8 @@ class Mage_Checkout_Model_Type_Onepage
             return array('error' => 1, 'message' => $validateRes);
         }
 
+        $this->_setCartCouponCode();
+
         $this->getQuote()->collectTotals()->save();
 
         $this->getCheckout()
@@ -657,7 +688,7 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Prepare quote for guest checkout order submit
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     protected function _prepareGuestQuote()
     {
@@ -672,7 +703,7 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Prepare quote for customer registration and customer order submit
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     protected function _prepareNewCustomerQuote()
     {
@@ -698,14 +729,18 @@ class Mage_Checkout_Model_Type_Onepage
 
         Mage::helper('core')->copyFieldset('checkout_onepage_quote', 'to_customer', $quote, $customer);
         $customer->setPassword($customer->decryptPassword($quote->getPasswordHash()));
+        $passwordCreatedTime = $this->_checkoutSession->getData('_session_validator_data')['session_expire_timestamp']
+            - Mage::getSingleton('core/cookie')->getLifetime();
+        $customer->setPasswordCreatedAt($passwordCreatedTime);
         $quote->setCustomer($customer)
             ->setCustomerId(true);
+        $quote->setPasswordHash('');
     }
 
     /**
      * Prepare quote for customer order submit
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     protected function _prepareCustomerQuote()
     {
@@ -740,7 +775,7 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Involve new customer to system
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     protected function _involveNewCustomer()
     {
@@ -761,7 +796,7 @@ class Mage_Checkout_Model_Type_Onepage
     /**
      * Create order based on checkout type. Create customer if necessary.
      *
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     public function saveOrder()
     {
@@ -851,7 +886,7 @@ class Mage_Checkout_Model_Type_Onepage
      * Validate quote state to be able submitted from one page checkout page
      *
      * @deprecated after 1.4 - service model doing quote validation
-     * @return Mage_Checkout_Model_Type_Onepage
+     * @return $this
      */
     protected function validateOrder()
     {
@@ -917,5 +952,18 @@ class Mage_Checkout_Model_Type_Onepage
             $orderId = $order->getIncrementId();
         }
         return $orderId;
+    }
+
+    /**
+     * Sets cart coupon code from checkout to quote
+     *
+     * @return $this
+     */
+    protected function _setCartCouponCode()
+    {
+        if ($couponCode = $this->getCheckout()->getCartCouponCode()) {
+            $this->getQuote()->setCouponCode($couponCode);
+        }
+        return $this;
     }
 }

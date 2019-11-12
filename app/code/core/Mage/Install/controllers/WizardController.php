@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Install
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Prepare layout
      *
-     * @return unknown
+     * @return $this
      */
     protected function _prepareLayout()
     {
@@ -81,7 +81,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Checking installation status
      *
-     * @return unknown
+     * @return bool
      */
     protected function _checkIfInstalled()
     {
@@ -314,6 +314,8 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
 
         if ($config && $connectionConfig && isset($connectionConfig[$config['db_model']])) {
 
+            $config['unsecure_base_url'] = Mage::helper('core/url')->encodePunycode($config['unsecure_base_url']);
+            $config['secure_base_url'] = Mage::helper('core/url')->encodePunycode($config['unsecure_base_url']);
             $data = array_merge($config, $connectionConfig[$config['db_model']]);
 
             Mage::getSingleton('install/session')

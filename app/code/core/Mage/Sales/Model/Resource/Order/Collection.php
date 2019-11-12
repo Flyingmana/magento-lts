@@ -20,7 +20,7 @@
  *
  * @category    Mage
  * @package     Mage_Sales
- * @copyright  Copyright (c) 2006-2015 X.commerce, Inc. (http://www.magento.com)
+ * @copyright  Copyright (c) 2006-2019 Magento, Inc. (http://www.magento.com)
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -64,7 +64,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
     /**
      * Add items count expr to collection select, backward capability with eav structure
      *
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     public function addItemCountExpr()
     {
@@ -87,6 +87,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
         /* @var $countSelect Varien_Db_Select */
         $countSelect = parent::getSelectCountSql();
         $countSelect->resetJoinLeft();
+        $countSelect->reset(Zend_Db_Select::GROUP);
         return $countSelect;
     }
 
@@ -108,7 +109,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      * Join table sales_flat_order_address to select for billing and shipping order addresses.
      * Create corillation map
      *
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     protected function _addAddressFields()
     {
@@ -118,11 +119,13 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
 
         $this
             ->addFilterToMap('billing_firstname', $billingAliasName . '.firstname')
+            ->addFilterToMap('billing_middlename', $billingAliasName . '.middlename')
             ->addFilterToMap('billing_lastname', $billingAliasName . '.lastname')
             ->addFilterToMap('billing_telephone', $billingAliasName . '.telephone')
             ->addFilterToMap('billing_postcode', $billingAliasName . '.postcode')
 
             ->addFilterToMap('shipping_firstname', $shippingAliasName . '.firstname')
+            ->addFilterToMap('shipping_middlename', $shippingAliasName . '.middlename')
             ->addFilterToMap('shipping_lastname', $shippingAliasName . '.lastname')
             ->addFilterToMap('shipping_telephone', $shippingAliasName . '.telephone')
             ->addFilterToMap('shipping_postcode', $shippingAliasName . '.postcode');
@@ -135,6 +138,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
                     . " AND {$billingAliasName}.address_type = 'billing')",
                 array(
                     $billingAliasName . '.firstname',
+                    $billingAliasName . '.middlename',
                     $billingAliasName . '.lastname',
                     $billingAliasName . '.telephone',
                     $billingAliasName . '.postcode'
@@ -146,6 +150,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
                     . " AND {$shippingAliasName}.address_type = 'shipping')",
                 array(
                     $shippingAliasName . '.firstname',
+                    $shippingAliasName . '.middlename',
                     $shippingAliasName . '.lastname',
                     $shippingAliasName . '.telephone',
                     $shippingAliasName . '.postcode'
@@ -172,7 +177,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      *
      * @param string $field
      * @param null|string|array $condition
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     public function addFieldToSearchFilter($field, $condition = null)
     {
@@ -186,7 +191,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      *
      * @param array $attributes
      * @param array|integer|string|null $condition
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     public function addAttributeToSearchFilter($attributes, $condition = null)
     {
@@ -208,7 +213,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      * Add filter by specified billing agreements
      *
      * @param int|array $agreements
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     public function addBillingAgreementsFilter($agreements)
     {
@@ -226,7 +231,7 @@ class Mage_Sales_Model_Resource_Order_Collection extends Mage_Sales_Model_Resour
      * Add filter by specified recurring profile id(s)
      *
      * @param array|int $ids
-     * @return Mage_Sales_Model_Resource_Order_Collection
+     * @return $this
      */
     public function addRecurringProfilesFilter($ids)
     {
