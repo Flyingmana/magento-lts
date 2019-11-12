@@ -8,10 +8,10 @@ jobs:
   php_syntax:
     runs-on: ${{ matrix.operating-system }}
     strategy:
-      max-parallel: 15
+      max-parallel: 2
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: ['5.6', '7.0', '7.1', '7.2', '7.3', '7.4']
+        php-versions: [ '7.3', '5.6', '7.0', '7.1', '7.2']
     steps:
       - uses: actions/checkout@v1
       - name: Setup PHP
@@ -27,5 +27,31 @@ jobs:
       - name: Check .php files
         run: '! find . -not \( -path ./.phpstorm.meta.php -prune \) -not \( -path ./lib/PEAR -prune \) -not \( -path ./lib/phpseclib -prune \) -not \( -path ./lib/Zend -prune \) -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
       - name: Check .phtml files
+        run: '! find app/design -type f -name "*.phtml" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+  php_syntax_experimental:
+    runs-on: ${{ matrix.operating-system }}
+    needs: php_syntax
+    strategy:
+      max-parallel: 1
+      matrix:
+        operating-system: [ubuntu-latest]
+        php-versions: [7.4']
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup PHP
+        uses: shivammathur/setup-php@master
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extension-csv: mbstring #optional, setup extensions
+          ini-values-csv: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
+          coverage: none #optional, setup coverage driver
+          pecl: true #optional, setup PECL
+      - name: Check PHP Version
+        run: php -v
+      - name: Check .php files
+        continue-on-error: true
+        run: '! find . -not \( -path ./.phpstorm.meta.php -prune \) -not \( -path ./lib/PEAR -prune \) -not \( -path ./lib/phpseclib -prune \) -not \( -path ./lib/Zend -prune \) -type f -name "*.php" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
+      - name: Check .phtml files
+        continue-on-error: true
         run: '! find app/design -type f -name "*.phtml" -exec php -d error_reporting=32767 -l {} \; 2>&1 >&- | grep "^"'
 
