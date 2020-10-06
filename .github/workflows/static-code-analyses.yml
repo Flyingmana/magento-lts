@@ -1,7 +1,10 @@
 name: "Static Code Analyses"
 on:
-  push:
-  pull_request:
+
+  release:
+    types: [created]
+#  push:
+#  pull_request:
 
 
 jobs:
