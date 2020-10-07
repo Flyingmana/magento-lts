@@ -47,7 +47,7 @@ jobs:
           curl http://localhost:8080/info.php
       - name: curl index.php
         run: |
-          curl http://localhost:8080/index.php
+          curl -iL http://localhost:8080/index.php
       - name: docker logs
         run: |
           docker logs "${{ job.services.nginx.id }}"
