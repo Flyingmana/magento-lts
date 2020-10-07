@@ -52,4 +52,6 @@ jobs:
       - name: Check PHP Version
         run: php -v
       - name: curl test
-        run: curl http://localhost:8080/README.md
+        run: |
+          curl http://localhost:8080/README.md
+          curl http://localhost:8080/index.php
