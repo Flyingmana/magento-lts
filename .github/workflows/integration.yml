@@ -23,7 +23,7 @@ jobs:
       fpm:
         image: openmage/php:7.3.20
         ports:
-          - 9000
+          - 9000:9000
         volumes:
           - ${{ github.workspace }}/:/var/www
       #          - ${{ github.workspace }}/.github/workflows/fpm-ini-overrides.ini:/etc/php/7.3/fpm/conf.d/99-overrides.ini
