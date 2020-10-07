@@ -55,7 +55,7 @@ jobs:
         run: |
           # curl http://localhost:8080/README.md
           curl http://localhost:8080/info.php
-       - name: docker logs
-         run: |
-           docker logs "${{ job.services.nginx.id }}"
-           docker logs "${{ job.services.fpm.id }}"
+      - name: docker logs
+        run: |
+          docker logs "${{ job.services.nginx.id }}"
+          docker logs "${{ job.services.fpm.id }}"
