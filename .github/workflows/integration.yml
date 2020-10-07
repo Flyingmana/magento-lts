@@ -10,7 +10,7 @@ jobs:
       max-parallel: 2
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions: [ '7.3', '7.2']
+        php-images: [ 'openmage/php:7.3.20', 'openmage/php:7.4.4']
         mysql-images: [ 'mysql:5.7', 'mysql:8']
     services:
       mysql:
@@ -21,7 +21,7 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
       fpm:
-        image: openmage/php:7.3.20
+        image: ${{ matrix.php-images }}
         ports:
           - 9000:9000
         volumes:
@@ -41,16 +41,6 @@ jobs:
           sudo apt-get install -y mysql-client
           mysql --host 127.0.0.1 --port 3306 -uroot -ppassword -e "SHOW DATABASES"
           mysql --host 127.0.0.1 --port 3306 -uroot -ppassword -e "SHOW VARIABLES LIKE \"%version%\""
-      - name: Setup PHP
-        uses: shivammathur/setup-php@master
-        with:
-          php-version: ${{ matrix.php-versions }}
-          extension-csv: mbstring #optional, setup extensions
-          ini-values-csv: post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
-          coverage: none #optional, setup coverage driver
-          pecl: true #optional, setup PECL
-      - name: Check PHP Version
-        run: php -v
       - name: curl test
         run: |
           # curl http://localhost:8080/README.md
