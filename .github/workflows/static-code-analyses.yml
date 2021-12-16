@@ -52,6 +52,21 @@ jobs:
       - name: PHPStan Static Analysis
         run: php vendor/bin/phpstan.phar analyze -c ${{ matrix.config_files }} ${{ matrix.directories }}
 
+  xml_linting:
+    name: xml syntax check
+    runs-on: [ubuntu-latest]
+    strategy:
+      max-parallel: 2
+    steps:
+      - uses: actions/checkout@v2
+      - name: XML syntax check
+        uses: anyone-developer/anyone-validate-xml@main
+        with:
+          file-extension: '.xml'
+          ignore-files: 'README.md'
+          ignore-directories: '.git'
+          read-path: './'
+
   php_syntax_experimental:
     name: PHP Syntax ${{ matrix.php-versions }} - experimental
     runs-on: ${{ matrix.operating-system }}
