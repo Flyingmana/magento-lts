@@ -23,7 +23,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: mbstring
+          extensions: mbstring, gd, soap
           tools: composer, pecl, phpcs, phpstan, phpunit:9.5
           ini-values: pcov.directory=api, post_max_size=256M, short_open_tag=On #optional, setup php.ini configuration
           coverage: pcov #optional, setup coverage driver
@@ -42,7 +42,7 @@ jobs:
           restore-keys: ${{ runner.os }}-composer-
 
       - name: Install dependencies
-        run: composer install --dev -n --prefer-source --ignore-platform-req=php+
+        run: composer install --dev -n --prefer-dist --ignore-platform-req=php+
 
       - name: Run Unit Tests
         run: phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit;
