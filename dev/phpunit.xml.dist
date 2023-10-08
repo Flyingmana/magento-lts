@@ -31,6 +31,7 @@
             processUncoveredFiles="false"
     >
         <include>
+            <directory suffix=".php">app/code</directory>
             <directory suffix=".php">../app/code</directory>
             <directory suffix=".php">../lib</directory>
         </include>
