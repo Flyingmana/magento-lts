@@ -57,7 +57,7 @@ jobs:
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/junit.xml
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/clover.xml
           head ./dev/tests/clover.xml
-          ls -la
+          ls -la ./dev/tests/
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
