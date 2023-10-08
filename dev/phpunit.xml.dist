@@ -27,7 +27,7 @@
     </testsuites>
 
     <coverage
-            includeUncoveredFiles="false"
+            includeUncoveredFiles="true"
             processUncoveredFiles="false"
     >
         <include>
