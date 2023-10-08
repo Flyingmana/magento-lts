@@ -16,7 +16,7 @@ jobs:
       max-parallel: 5
       matrix:
         os: [ubuntu-latest]
-        php: ['7.4', '8.1']
+        php: ['8.1']
     steps:
       - uses: actions/checkout@v4
       - name: Setup PHP
@@ -45,7 +45,7 @@ jobs:
         run: composer install --dev -n --prefer-dist --ignore-platform-req=php+
 
       - name: Run Unit Tests
-        run: phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit;
+        run: vendor/bin/phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit;
 
       - name: prepare SonarCloud Scan Data
         continue-on-error: true
