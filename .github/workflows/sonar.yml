@@ -1,6 +1,7 @@
 name: Sonar
 
 on:
+  push:
   # Run automatically every Monday on midnight.
   schedule:
     - cron: '0 0 * * 1'
