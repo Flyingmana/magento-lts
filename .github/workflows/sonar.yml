@@ -45,7 +45,7 @@ jobs:
         run: composer install --dev -n --prefer-dist --ignore-platform-req=php+
 
       - name: Run Unit Tests
-        run: vendor/bin/phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit;
+        run: vendor/bin/phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit  -vvv --debug;
 
       - name: prepare SonarCloud Scan Data
         continue-on-error: true
@@ -65,7 +65,7 @@ jobs:
         if: ${{ matrix.php == '8.1' }} && SONAR_TOKEN
         with:
           args: >
-            -Dproject.settings=dev/sonar-project.properties
+            -Dproject.settings=dev/sonar-project.properties -Dsonar.verbose=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
