@@ -40,6 +40,34 @@
             <file>../app/bootstrap.php</file>
             <file>../app/code/core/Mage/Admin/Model/Acl/Assert/Ip.php</file>
             <file>../app/code/core/Mage/Admin/Model/Acl/Assert/Time.php</file>
+            <directory>app/code/core/Mage</directory>
+            <directory>../app/code/core/Mage</directory>
+            <directory>app/code/core/Mage/*/sql</directory>
+            <directory>app/code/core/Mage/Admin/sql</directory>
+            <directory>app/code/core/Mage/Catalog/sql</directory>
+            <directory>app/code/core/Mage/CatalogIndex/sql</directory>
+            <directory>app/code/core/Mage/CatalogInventory/sql</directory>
+            <directory>app/code/core/Mage/CatalogRule/sql</directory>
+            <directory>app/code/core/Mage/CatalogSearch/sql</directory>
+            <directory>app/code/core/Mage/Checkout/sql</directory>
+            <directory>app/code/core/Mage/Cms/sql</directory>
+            <directory>app/code/core/Mage/Core/sql</directory>
+            <directory>app/code/core/Mage/Cron/sql</directory>
+            <directory>app/code/core/Mage/Customer/sql</directory>
+            <directory>app/code/core/Mage/Log/sql</directory>
+            <directory>app/code/core/Mage/Newsletter/sql</directory>
+            <directory>app/code/core/Mage/Paygate/sql</directory>
+            <directory>app/code/core/Mage/Paypal/sql</directory>
+            <directory>app/code/core/Mage/Reports/sql</directory>
+            <directory>app/code/core/Mage/Review/sql</directory>
+            <directory>app/code/core/Mage/Sales/sql</directory>
+            <directory>app/code/core/Mage/SalesRule/sql</directory>
+            <directory>app/code/core/Mage/Sendfriend/sql</directory>
+            <directory>app/code/core/Mage/Shipping/sql</directory>
+            <directory>app/code/core/Mage/Tag/sql</directory>
+            <directory>app/code/core/Mage/Usa/sql</directory>
+            <directory>app/code/core/Mage/Tax/sql</directory>
+            <directory>app/code/core/Mage/Wishlist/sql</directory>
         </exclude>
         <report>
             <clover outputFile="./tests/clover.xml"/>
