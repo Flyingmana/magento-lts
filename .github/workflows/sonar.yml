@@ -46,19 +46,29 @@ jobs:
         run: composer install --dev -n --prefer-dist --ignore-platform-req=php+
 
       - name: Run Unit Tests
-        run: vendor/bin/phpunit --configuration ./dev/phpunit.xml.dist --testsuite=Unit  -vvv --debug;
+        run: vendor/bin/phpunit --configuration ./phpunit.xml.dist --testsuite=Unit  -vvv --debug;
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v3
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./dev/tests/clover.xml
+          full_report: ./dev/tests/clover.xml
+          flags: unittests
+          verbose: true
 
       - name: prepare SonarCloud Scan Data
         continue-on-error: true
         if: ${{ matrix.php == '8.1' }}
         run: |
           echo $PWD
-          ls -la
-          head ./dev/tests/clover.xml
+          ls -la ./dev/tests/
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/junit.xml
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/clover.xml
           head ./dev/tests/clover.xml
-          ls -la ./dev/tests/
+          tail ./dev/tests/clover.xml
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
