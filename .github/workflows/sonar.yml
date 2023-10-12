@@ -66,6 +66,9 @@ jobs:
           echo $PWD
           ls -la ./
           ls -la ./dev/tests/
+          head -n 30 ./dev/tests/clover.xml
+          echo "####"
+          tail -n 30 ./dev/tests/clover.xml
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/junit.xml
           sed -i 's@'$GITHUB_WORKSPACE'/@/github/workspace/@g' ./dev/tests/clover.xml
           head -n 30 ./dev/tests/clover.xml
