@@ -27,13 +27,15 @@
     </testsuites>
 
     <coverage
-            includeUncoveredFiles="false"
+            includeUncoveredFiles="true"
             processUncoveredFiles="false"
             pathCoverage="false"
     >
         <include>
-            <directory suffix=".php">app/code</directory>
-            <directory suffix=".php">lib</directory>
+            <directory suffix=".php">./app/code/</directory>
+            <directory suffix=".php">./lib/</directory>
+            <directory suffix=".php">/work/openmage-pr-work/app/code/</directory>
+            <directory suffix=".php">/github/workspace/app/code/</directory>
         </include>
         <report>
             <clover outputFile="dev/tests/clover.xml"/>

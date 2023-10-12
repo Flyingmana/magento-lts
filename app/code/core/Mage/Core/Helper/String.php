@@ -88,6 +88,9 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function substr($string, $offset, $length = null)
     {
+        var_dump(__DIR__);
+        var_dump(__FILE__);
+        var_dump(getcwd());
         if (is_null($string)) {
             return '';
         }
